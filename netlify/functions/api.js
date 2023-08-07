@@ -1,6 +1,5 @@
 import express, { Router } from 'express';
 import serverless from 'serverless-http';
-const path = require("path");
 const dotenv = require("dotenv");
 const { uuid } = require("uuidv4");
 const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-library");
@@ -59,6 +58,79 @@ router.post('/sessions', async (req, res) => {
         res.status(err.statusCode).json(err.message);
     }
 });
+
+
+// Handle all redirects from payment type
+router.all('/handleShopperRedirect', async (req, res) => {
+    // Create the payload for submitting payment details
+    const redirect = req.method === "GET" ? req.query : req.body;
+    const details = {};
+    if (redirect.redirectResult) {
+        details.redirectResult = redirect.redirectResult;
+    } else if (redirect.payload) {
+        details.payload = redirect.payload;
+    }
+
+    try {
+        const response = await checkout.paymentsDetails({ details });
+        // Conditionally handle different result codes for the shopper
+        switch (response.resultCode) {
+            case "Authorised":
+                res.redirect("/result/success");
+                break;
+            case "Pending":
+            case "Received":
+                res.redirect("/result/pending");
+                break;
+            case "Refused":
+                res.redirect("/result/failed");
+                break;
+            default:
+                res.redirect("/result/error");
+                break;
+        }
+    } catch (err) {
+        console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
+        res.redirect("/result/error");
+    }
+
+});
+/* ################# end API ENDPOINTS ###################### */
+
+
+/* ################# WEBHOOK ###################### */
+router.post('/webhooks/notifications', async (req, res) => {
+
+    // YOUR_HMAC_KEY from the Customer Area
+    const hmacKey = process.env.ADYEN_HMAC_KEY;
+    const validator = new hmacValidator()
+
+    // NotificationRequest JSON
+    const notificationRequest = req.body;
+
+    // Fetch first (and only) NotificationRequestItem
+    const notification = notificationRequest.notificationItems[0].NotificationRequestItem;
+
+    // Handle the notification
+    if (!validator.validateHMAC(notification, hmacKey)) {
+        // invalid hmac: do not send [accepted] response
+        console.log("Invalid HMAC signature: " + notification);
+        res.status(401).send('Invalid HMAC signature');
+        return;
+    }
+
+    // Process the notification asynchronously based on the eventCode
+    consumeEvent(notification);
+    res.send('[accepted]');
+});
+
+// Process payload
+function consumeEvent(notification) {
+    // Add item to DB, queue or different thread, we just log it for now
+    const merchantReference = notification.merchantReference;
+    const eventCode = notification.eventCode;
+    console.log('merchantReference:' + merchantReference + " eventCode:" + eventCode);
+}
 
 app.use('/api/', router);
 
