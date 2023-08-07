@@ -1,11 +1,65 @@
 import express, { Router } from 'express';
 import serverless from 'serverless-http';
+const path = require("path");
+const dotenv = require("dotenv");
+const { uuid } = require("uuidv4");
+const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-library");
 
-const api = express();
+const app = express();
+
+app.use(express.json());
+// Parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
+
+// enables environment variables by
+// parsing the .env file and assigning it to process.env
+dotenv.config({
+    path: "./.env",
+});
+
+// Adyen Node.js API library boilerplate (configuration, etc.)
+const config = new Config();
+config.apiKey = process.env.ADYEN_API_KEY;
+const client = new Client({ config });
+client.setEnvironment("TEST");
+const checkout = new CheckoutAPI(client);
+
+
+/* ################# API ENDPOINTS ###################### */
 
 const router = Router();
 router.get('/hello', (req, res) => res.send('Hello World!'));
 
-api.use('/api/', router);
+router.post('/sessions', async (req, res) => {
+    try {
+        // Unique ref for the transaction
+        const orderRef = uuid();
+        // Determine host (for setting returnUrl)
+        const protocol = req.socket.encrypted ? 'https' : 'http';
+        const host = req.get('host');
+        const payload = req.body
 
-export const handler = serverless(api);
+
+        // Ideally the data passed here should be computed based on business logic
+        const response = await checkout.sessions({
+            amount: { currency: "EUR", value: payload.amount }, // Value is 100€ in minor units
+            countryCode: "NL",
+            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // Required: your merchant account
+            reference: orderRef, // Required: your Payment Reference
+            // set lineItems required for some payment methods (ie Klarna)
+            lineItems: [
+                { quantity: 1, amountIncludingTax: 5000, description: "Sunglasses" },
+                { quantity: 1, amountIncludingTax: 5000, description: "Headphones" }
+            ],
+            returnUrl: `${protocol}://${host}/api/handleShopperRedirect?orderRef=${orderRef}` // Required `returnUrl` param: Set redirect URL required for some payment methods
+        });
+        res.json({ response, clientKey: process.env.ADYEN_CLIENT_KEY });
+    } catch (err) {
+        console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
+        res.status(err.statusCode).json(err.message);
+    }
+});
+
+app.use('/api/', router);
+
+export const handler = serverless(app);
