@@ -1,0 +1,5 @@
+ .old-price {
+    text-decoration: line-through;
+    color: rgb(225, 90, 90);
+    margin-right: 15px;
+ }

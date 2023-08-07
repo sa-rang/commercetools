@@ -1,0 +1,16 @@
+{
+    "en": {
+        "midSeasonSale": "MID-SEASON SALE",
+        "up70": "UP TO 70%",
+        "shopNow": "SHOP NOW",
+        "checkout": "CHECK OUT",
+        "newCollection": "NEW COLLECTION"
+    },
+    "de": {
+        "midSeasonSale": "SOMMERSCHLUSSVERKAUF",
+        "up70": "BIS ZU 70%",
+        "shopNow": "JETZT SHOPPEN",
+        "checkout": " ",
+        "newCollection": "NEUE KOLLEKTION"
+    }
+}

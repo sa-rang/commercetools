@@ -1,0 +1,14 @@
+{
+  "en": {
+    "search": "Search",
+    "stores": "Stores",
+    "help": "Help",
+    "contact": "Contact"
+  },
+  "de": {
+    "search": "Suche",
+    "stores": "Filiale",
+    "help": "Hilfe",
+    "contact": "Kontakt"
+  }
+}

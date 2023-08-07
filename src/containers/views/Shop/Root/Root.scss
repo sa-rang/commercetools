@@ -1,0 +1,29 @@
+.main-wrapper,
+.main-wrapper-2,
+.main-wrapper-3,
+.main-wrapper-4 {
+
+  .body-overlay,
+  .body-overlay-2,
+  .body-overlay-3,
+  .body-overlay-4 {
+    background-color: #232324;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    transition: all 0.5s ease-in-out 0s;
+    visibility: hidden;
+    opacity: 0;
+    width: 100%;
+    z-index: 99999;
+  }
+
+  &.overlay-active .body-overlay,
+  &.overlay-active-2 .body-overlay-2,
+  &.overlay-active-3 .body-overlay-3,
+  &.overlay-active-4 .body-overlay-4 {
+    opacity: 0.7;
+    visibility: visible;
+  }
+}
