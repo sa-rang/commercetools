@@ -1,2 +1,4 @@
 /api/*  /api/:splat 200
-/*  /index.html  200
+
+/DE  /index.html  200
+/US  /index.html  200
