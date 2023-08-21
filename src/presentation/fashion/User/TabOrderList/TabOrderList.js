@@ -28,14 +28,18 @@ export default {
     function translateStatus(state) {
       return state ? t(state) : '-';
     }
-    function paymentInfo(order) {
-      return order?.paymentInfo?.payments?.[0]
-        ?.paymentStatus?.interfaceCode
-        ? t(
-          order?.paymentInfo?.payments?.[0]?.paymentStatus
-            ?.interfaceCode
-        )
-        : '';
+    // function paymentInfo(order) {
+    //   return order?.paymentInfo?.payments?.[0]
+    //     ?.paymentStatus?.interfaceCode
+    //     ? t(
+    //       order?.paymentInfo?.payments?.[0]?.paymentStatus
+    //         ?.interfaceCode
+    //     )
+    //     : '';
+    // }
+
+    const paymentInfo = (order) => {
+      return order?.paymentState ? t(order?.paymentState) : ""
     }
 
     return {

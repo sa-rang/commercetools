@@ -31,22 +31,36 @@ export default {
     const { cart, loading } = useCart();
     const cartTools = useCartTools();
     //@todo: what happened to the payment method passed to this?
-    const placeOrder = (iData) => {
+    const placeOrder = () => {
       if (!validBillingForm.value) {
         showError.value = true;
         return Promise.resolve();
       }
       showError.value = false;
       return cartTools
-        .setAddressForCart({
+        .setAddressForCartAndCreateOrder({
           billingAddress,
           shippingAddress,
         })
-        .then(() => {
+        .then(({ data }) => {
+          console.log(data);
+
+          // return cartTools.createPaymentAndUpdateOrder({
+          //   method: "Card",
+          //   payId: "MyTestId",
+          //   payStatus: "OK",
+          //   centAmount: 150,
+          // }).then(() => {
+
+          // }).catch((error) => console.warn('error:', error));
+
+
           router.push({
             name: 'pay',
-            //params: { method: paymentMethod.value },
-            params: { method: iData.payMethod, payid: iData.payId },
+            query: {
+              id: data.createMyOrderFromCart.cartId,
+              v: data.createMyOrderFromCart.version
+            }
           });
         })
         .catch((e) => {

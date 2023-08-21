@@ -12,8 +12,11 @@
                 <router-link :to="{ name: 'stores' }" data-test="stores-link" v-if="showStoreSelector">
                   {{ t('stores') }}
                 </router-link>
-                <a href="#">{{ t('help') }}</a>
-                <a href="/contact-us">{{ t('contact') }}</a>
+                <a @click.prevent="openHelpPopup">{{ t('help') }}</a>
+                <router-link to="/contact-us">
+                  {{ t('contact') }}
+                </router-link>
+
               </div>
             </div>
             <div class="col-sm-6 d-flex justify-content-end">

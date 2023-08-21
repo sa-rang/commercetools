@@ -9,6 +9,7 @@
       <table class="table table-bordered">
         <thead class="thead-light">
           <tr>
+            <th>{{ t('orderNumber') }}</th>
             <th>{{ t('date') }}</th>
             <th>{{ t('total') }}</th>
             <th>{{ t('paymentStatus') }}</th>
@@ -18,6 +19,9 @@
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.orderId" data-test="order-list">
+            <td data-test="order-date">
+              <span>{{ order.orderNumber }}</span>
+            </td>
             <td data-test="order-date">
               <!-- @todo: base date is not working i18n error -->
               <BaseDate :date="order.createdAt" :format="'short'" />
@@ -30,6 +34,7 @@
             </td>
             <td data-test="shipment-state">
               {{ translateStatus(order.shipmentState) }}
+
             </td>
             <td>
               <router-link :to="{

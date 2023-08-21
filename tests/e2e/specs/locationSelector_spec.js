@@ -31,7 +31,7 @@ describe('Location selector', () => {
   });
 
   it('changes prices to selected country', () => {
-    cy.changeCountry('United States');
+    cy.changeCountry('USA');
     cy.get('[data-test=product-original-price]').contains(
       /^\s*(US)?\$343.75\s*$/
     );

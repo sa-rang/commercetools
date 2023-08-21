@@ -50,6 +50,11 @@ export default {
     };
     const { showStoreSelector, showLocationSelector } =
       useAccessRules();
+
+    const openHelpPopup = () => {
+      let lft = window.innerWidth - 800;
+      window.open('help.html', 'Help', `width=450,height=650,top=0,left=${lft},scrollbars=yes`);
+    }
     return {
       t,
       doSearch,
@@ -66,6 +71,7 @@ export default {
       showStoreSelector,
       showLocationSelector,
       totalShoppingCartItems: 0, //@todo: need this one??
+      openHelpPopup
     };
   },
   components: {

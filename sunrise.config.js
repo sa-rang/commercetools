@@ -27,13 +27,13 @@ const config = {
       scope:
         getEnv('VUE_APP_CT_SCOPE') ||
         'manage_my_orders:sunrise-spa ' +
-          'manage_my_profile:sunrise-spa ' +
-          'manage_my_payments:sunrise-spa ' +
-          'view_published_products:sunrise-spa ' +
-          'view_categories:sunrise-spa ' +
-          'manage_my_shopping_lists:sunrise-spa ' +
-          'manage_orders:sunrise-spa ' +
-          'create_anonymous_token:sunrise-spa',
+        'manage_my_profile:sunrise-spa ' +
+        'manage_my_payments:sunrise-spa ' +
+        'view_published_products:sunrise-spa ' +
+        'view_categories:sunrise-spa ' +
+        'manage_my_shopping_lists:sunrise-spa ' +
+        'manage_orders:sunrise-spa ' +
+        'create_anonymous_token:sunrise-spa',
     },
     api:
       getEnv('VUE_APP_CT_API_HOST') ||
@@ -45,7 +45,7 @@ const config = {
   },
   countries: {
     DE: 'Deutschland',
-    US: 'United States',
+    US: 'USA',
   },
   formats: {
     number: {

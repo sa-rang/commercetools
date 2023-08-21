@@ -29,6 +29,7 @@ export default {
           h3Message: 'midSeasonSale',
           h1Message: 'up70',
           bttnText: 'shopNow',
+          link: "/products/all?q=jacket"
         },
       },
       {
@@ -38,6 +39,7 @@ export default {
           h3Message: 'checkout',
           h1Message: 'newCollection',
           bttnText: 'shopNow',
+          link: "/products/men"
         },
       },
       {
@@ -47,6 +49,7 @@ export default {
           h3Message: 'checkout',
           h1Message: 'newCollection',
           bttnText: 'shopNow',
+          link: "/products/women"
         },
       },
     ],

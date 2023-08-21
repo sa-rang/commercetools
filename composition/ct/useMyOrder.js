@@ -117,6 +117,10 @@ const query = gql`
               interfaceCode
             }
           }
+          paymentRefs{
+            id,
+            typeId
+          }
         }
         returnInfo {
           items {
@@ -125,6 +129,8 @@ const query = gql`
             ...returnedItem
           }
         }
+        paymentState
+        orderState
       }
     }
   }

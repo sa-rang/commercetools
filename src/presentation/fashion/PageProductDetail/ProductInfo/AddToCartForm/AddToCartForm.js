@@ -48,6 +48,7 @@ export default {
     const { addLine } = useCartTools();
     const addLineItem = () =>
       addLine(props.sku, Number(form.value.quantity));
+
     return { t, addLineItem, v, showQuantityError };
   },
 };

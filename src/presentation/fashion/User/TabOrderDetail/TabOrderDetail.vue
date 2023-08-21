@@ -5,18 +5,18 @@
 <template>
   <div class="myaccount-content">
     <div v-if="order">
-      <h3>{{ t('title') }}</h3>
-      <div class="row your-order-details">
+      <h3>
+        <span>{{ t('title') }}</span>
+        <span v-if="order.orderNumber" data-test="details-order-number" style="margin-left: 150px;">
+          {{ order.orderNumber }} ({{ order.orderState }})
+        </span>
+      </h3>
+      <div class="row your-order-details" style="font-size: 14px;">
         <div class="col-md-3">
-          <span v-if="order.orderNumber">{{ t('orderNumber') }}
-            <br />
-          </span>
           {{ t('date') }}
         </div>
         <div class="col-md-3">
-          <span v-if="order.orderNumber" data-test="details-order-number">{{ order.orderNumber }}
-            <br />
-          </span>
+
           <!-- @todo: base date is broken i18n does not work -->
           <BaseDate :date="order.createdAt" :format="'short'" data-test="details-order-date" />
         </div>
@@ -58,7 +58,8 @@
         <div class="col-md-1"></div>
         <div class="col-md-5 address-detail">
           <b>{{ t('paymentDetails') }}</b>
-          <p class="mt-15">{{ paymentInfo }}</p>
+          <p class="mt-15">Payment Reference: {{ paymentInfo.paymentId }}</p>
+          <p class="mt-2">Payment Status: {{ paymentInfo.paymentStatus }}</p>
         </div>
       </div>
       <div class="mt-40">

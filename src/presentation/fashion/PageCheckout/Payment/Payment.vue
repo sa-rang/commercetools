@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div id="payment-page">
+        <div class="payment-page">
             <div class="container">
                 <div class="payment-container">
                     <div class="payment" ref="payElementRef"></div>
@@ -12,6 +12,7 @@
 
 <script >
 import { ref, onMounted, computed } from 'vue';
+import useCurrency from 'hooks/useCurrency';
 
 import '@adyen/adyen-web/dist/adyen.css';
 let AdyenCheckout;
@@ -20,7 +21,7 @@ AdyenCheckout = require("@adyen/adyen-web");
 export default {
     props: {
         amount: {
-            type: Number,
+            type: Object,
             required: true,
         },
     },
@@ -32,6 +33,7 @@ export default {
         const payElementRef = ref(null);
         const payMethodData = ref(null);
         const cartAmount = computed(() => props.amount);
+        const currency = useCurrency();
 
 
         onMounted(async () => {
@@ -56,12 +58,10 @@ export default {
                 const { response, clientKey } = await callServer(
                     "/api/sessions?type=" + payType,
                     {
-                        amount: cartAmount.value.centAmount
+                        amount: cartAmount.value.centAmount,
+                        currency: currency.value
                     }
                 );
-
-
-
                 // Create AdyenCheckout using Sessions response
                 const checkout = await createAdyenCheckout(response, clientKey);
 
@@ -119,12 +119,10 @@ export default {
                     }
                 },
                 beforeSubmit: async (data, component, actions) => {
-                    console.log(data)
                     payMethodData.value = data;
                     actions.resolve(data);
                 },
                 onPaymentCompleted: (result, component) => {
-                    console.log("result: " + result);
                     handleServerResponse(result, component);
                 },
                 onError: (error, component) => {
@@ -151,7 +149,14 @@ export default {
                 component.handleAction(res.action);
             } else {
                 if (res.resultCode) {
-                    emit('payment-status', { resultCode: res.resultCode, paymentRef: pspRef.value, payMethod: payMethodData.value?.paymentMethod?.type });
+                    let payMethod = payMethodData.value?.paymentMethod?.type == "scheme" ? "card" : payMethodData.value?.paymentMethod?.type;
+                    emit('payment-status',
+                        {
+                            resultCode: res.resultCode,
+                            centAmount: cartAmount.value.centAmount,
+                            paymentRef: pspRef.value,
+                            payMethod: payMethod
+                        });
                 }
                 // switch (res.resultCode) {
                 //     case "Authorised":
@@ -187,14 +192,41 @@ export default {
 
 </script>
 
-<style lang="scss" scoped>
-.payment {
+<style lang="scss" >
+.payment-page {
+    margin-top: 20px;
+
+    .container {
+        padding: 0;
+    }
+
     .adyen-checkout__status {
         height: 150px;
     }
 
+    .adyen-checkout__payment-method {
+        border-radius: 0;
+    }
+
+    .adyen-checkout__payment-method:first-child {
+        border-radius: 0;
+    }
+
+    .adyen-checkout__payment-method:last-child {
+        border-radius: 0;
+    }
+
     .adyen-checkout__payment-method--selected {
-        background: rgb(182, 136, 136);
+        background: #f9f9f9;
+        border-radius: 0;
+    }
+
+    .adyen-checkout__input {
+        border-radius: 0;
+    }
+
+    .adyen-checkout__button {
+        border-radius: 0;
     }
 }
 </style>

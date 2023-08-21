@@ -3,11 +3,13 @@ import { getValue } from '../../src/lib';
 import useMutation from '../useMutationFacade';
 import useCart from '../useCart';
 import gql from 'graphql-tag';
+
+
 export const createPayment = ({
   currency,
   centAmount,
   method,
-  paymentInterface
+  payId
 }) =>
   apolloClient
     .mutate({
@@ -27,8 +29,11 @@ export const createPayment = ({
           },
           paymentMethodInfo: {
             method,
-            paymentInterface
-          },
+            paymentInterface: payId
+          }
+          // paymentStatus: {
+          //   interfaceText: payStatus
+          // }
         },
       },
     })
@@ -36,6 +41,89 @@ export const createPayment = ({
       version: result.data.createMyPayment.version,
       id: result.data.createMyPayment.paymentId,
     }));
+
+
+export const createPaymentV2 = ({
+  currency,
+  centAmount,
+  method,
+  payId,
+  payStatus
+}) =>
+  apolloClient
+    .mutate({
+      mutation: gql`
+            mutation createPayment($draft: PaymentDraft!) {
+              createPayment(draft: $draft) {
+                paymentId: id
+                version
+              }
+            }
+          `,
+      variables: {
+        draft: {
+          amountPlanned: {
+            currencyCode: currency,
+            centAmount,
+          },
+          paymentMethodInfo: {
+            method,
+            paymentInterface: payId
+          },
+          paymentStatus: {
+            interfaceText: payStatus
+          }
+        },
+      },
+    })
+    .then((result) => ({
+      version: result.data.createPayment.version,
+      id: result.data.createPayment.paymentId,
+    }));
+
+
+
+export const addPaymentOnOrder = ({ orderId, orderNumber, version, paymentId, CTorderStatus, CTpayStatus }) => {
+  return apolloClient.mutate({
+    mutation: gql`
+          mutation addPaymentOnOrder(
+            $orderId: String
+            $version: Long!
+            $actions:[OrderUpdateAction!]!
+          ) {
+            updateOrder(
+              version: $version
+              id: $orderId
+              actions: $actions
+            ) {
+              id
+              orderNumber
+              orderState
+            }
+          }
+        `,
+    variables: {
+      orderId,
+      version,
+      actions: [
+        {
+          addPayment: {
+            payment: { typeId: "payment", id: paymentId }
+          }
+        },
+        {
+          changeOrderState: { orderState: CTorderStatus }
+        },
+        {
+          changePaymentState: { paymentState: CTpayStatus }
+        }, {
+          setOrderNumber: { orderNumber: orderNumber }
+        }
+      ]
+
+    },
+  });
+};
 
 const create = gql`
   mutation createCart($draft: MyCartDraft!) {
@@ -147,8 +235,7 @@ export const setShippingMethod = (shippingMethodId) => [
 //this is the React api useQuery(query,options)
 // https://www.apollographql.com/docs/react/api/react/hooks/#function-signature
 const useCartMutation = ({ location, currency }) => {
-  const [mutateFunction, { data, loading, error }] =
-    useMutation(mutation);
+  const [mutateFunction, { data, loading, error }] = useMutation(mutation);
   const [createCart] = useMutation(create);
   const { cart, exist } = useCart();
   const mutateCart = (actions) => {

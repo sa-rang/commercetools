@@ -47,14 +47,21 @@ export default {
       }
       return null;
     });
+    // const paymentInfo = computed(() => {
+    //   return order.value?.paymentInfo?.payments?.[0]
+    //     ?.paymentStatus?.interfaceCode
+    //     ? t(
+    //       order.value?.paymentInfo?.payments?.[0]
+    //         ?.paymentStatus?.interfaceCode
+    //     )
+    //     : '';
+    // });
+
     const paymentInfo = computed(() => {
-      return order.value?.paymentInfo?.payments?.[0]
-        ?.paymentStatus?.interfaceCode
-        ? t(
-          order.value?.paymentInfo?.payments?.[0]
-            ?.paymentStatus?.interfaceCode
-        )
-        : '';
+      return {
+        paymentId: order.value?.paymentInfo?.paymentRefs?.[0]?.id,
+        paymentStatus: order.value?.paymentState,
+      }
     });
     return {
       t,

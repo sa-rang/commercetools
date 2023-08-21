@@ -65,7 +65,7 @@
           </li>
         </ul>
       </div>
-      <Payment :amount="cart.totalPrice" @payment-status="paymentStatus" />
+      <!-- <Payment :amount="cart.totalPrice" @payment-status="paymentStatus" /> -->
 
       <!-- <div class="condition-wrap">
         <p>
@@ -84,7 +84,7 @@
         </div>
       </div> -->
     </div>
-    <div class="Place-order mt-30" v-if="paid">
+    <div class="Place-order mt-30">
       <a @click.prevent="placeOrder" data-test="place-order" href>
         {{ t('placeOrder') }}
       </a>

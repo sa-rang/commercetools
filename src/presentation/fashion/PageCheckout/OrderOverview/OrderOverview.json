@@ -9,7 +9,7 @@
     "total": "Total",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
-    "placeOrder": "Place Order"
+    "placeOrder": "Continue To Payment"
   },
   "de": {
     "itemsTotal": "{n} Artikel im Warenkorb",
@@ -21,6 +21,6 @@
     "total": "Gesamtpreis",
     "subtotal": "Zwischensumme",
     "shipping": "Vesrsand",
-    "placeOrder": "Bestellen"
+    "placeOrder": "Continue To Payment"
   }
 }

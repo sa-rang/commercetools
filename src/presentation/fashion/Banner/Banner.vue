@@ -24,7 +24,7 @@
                       {{ t(slide.content.h1Message) }}
                     </h1>
                     <div class="slider-btn-1">
-                      <router-link :to="{ name: 'home' }" class="animated"><!--{t("shopNow")}}-->
+                      <router-link :to="slide.content.link" class="animated"><!--{t("shopNow")}}-->
                         {{
                           t(slide.content.bttnText)
                         }}</router-link>

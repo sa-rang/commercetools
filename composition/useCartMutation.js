@@ -1,4 +1,4 @@
-import org, { createPayment } from './ct/useCartMutation';
+import org, { createPayment, createPaymentV2, addPaymentOnOrder } from './ct/useCartMutation';
 import useCurrency from './useCurrency';
 import useLocation from './useLocation';
 import {
@@ -12,9 +12,13 @@ import {
   setShippingAddress,
   createMyOrderFromCart,
 } from './ct/useCartMutation';
+import useMiniCart from './useMinicart';
 import useSelectedChannel from './useSelectedChannel';
 import { getValue } from '../src/lib';
 import { apolloClient, cache } from '../src/apollo';
+
+
+
 export {
   addLineItem,
   changeCartLineItemQuantity,
@@ -64,10 +68,13 @@ export const useCartActions = () => {
   const remove = (lineItemId) => {
     mutateCart(removeLineItem(lineItemId));
   };
-  const addLine = (sku, quantity) =>
+  const addLine = (sku, quantity) => {
+    const miniCart = useMiniCart();
     mutateCart(
       addLineItem(sku, quantity, channel.value?.id)
     );
+    miniCart.toggle();
+  }
   const applyDiscount = (code) =>
     mutateCart(addDiscountCode(code));
   const removeDiscount = (codeId) =>
@@ -81,14 +88,12 @@ export const useCartActions = () => {
   const setShipping = (address) =>
     mutateCart(setShippingAddress(address));
 
-  const createMyOrder = ({ method, payId, cart }) => {
-
-    console.log("ok", method, payId)
+  const createMyOrder = ({ method, payId, centAmount }) => {
     return createPayment({
       currency: currency.value,
-      centAmount: cart?.totalPrice?.centAmount,
+      centAmount: centAmount,
       method,
-      paymentInterface: payId
+      payId
     })
       .then(({ id }) =>
         mutateCart([
@@ -113,7 +118,7 @@ export const useCartActions = () => {
       });
   };
 
-  const setAddressForCart = ({
+  const setAddressForCartAndCreateOrder = ({
     billingAddress,
     shippingAddress,
   }) => {
@@ -129,12 +134,41 @@ export const useCartActions = () => {
           country: location.value,
         }),
       ];
-      return mutateCart(actions).then(() => {
-        cache.evict({ id: 'activeCart' });
-        cache.gc();
-      });
+      return mutateCart(actions).then(({ data }) => {
+        const { id, version } = data.updateMyCart;
+        return apolloClient.mutate(
+          createMyOrderFromCart(id, version)
+        );
+      })
     });
   };
+
+  const createPaymentAndUpdateOrder = ({ method, payId, payStatus, centAmount, orderId, orderVersion }) => {
+
+    let CTorderStatus = "Open" // Confirmed Complete Cancelled
+    let CTpayStatus = "Pending" // BalanceDue CreditOwed Failed Paid
+    let orderNumber = "AiOPS-" + new Date().valueOf();
+
+    if (payStatus == "Authorised") {
+      CTorderStatus = "Confirmed"
+      CTpayStatus = "Paid"
+    }
+
+    // create payment in CT
+    return createPaymentV2({
+      currency: currency.value,
+      centAmount: centAmount,
+      method,
+      payId,
+      payStatus
+    })
+      .then(({ id }) => {
+        // link payment to order in CT
+        return addPaymentOnOrder({ orderId: orderId, orderNumber, version: orderVersion, paymentId: id, CTorderStatus, CTpayStatus })
+      })
+  };
+
+
 
   return {
     error,
@@ -147,6 +181,7 @@ export const useCartActions = () => {
     setBillingAddress: setBilling,
     setShippingAddress: setShipping,
     createMyOrderFromCart: createMyOrder,
-    setAddressForCart,
+    setAddressForCartAndCreateOrder,
+    createPaymentAndUpdateOrder
   };
 };
