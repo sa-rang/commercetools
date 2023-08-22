@@ -43,18 +43,6 @@ export default {
           shippingAddress,
         })
         .then(({ data }) => {
-          console.log(data);
-
-          // return cartTools.createPaymentAndUpdateOrder({
-          //   method: "Card",
-          //   payId: "MyTestId",
-          //   payStatus: "OK",
-          //   centAmount: 150,
-          // }).then(() => {
-
-          // }).catch((error) => console.warn('error:', error));
-
-
           router.push({
             name: 'pay',
             query: {

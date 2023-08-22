@@ -10,6 +10,10 @@
         <span v-if="order.orderNumber" data-test="details-order-number" style="margin-left: 150px;">
           {{ order.orderNumber }} ({{ order.orderState }})
         </span>
+        <span v-if="!order.paymentState || order.paymentState == 'Pending'" data-test="details-order-number"
+          style="margin-left: 300px;">
+          Payment Pending
+        </span>
       </h3>
       <div class="row your-order-details" style="font-size: 14px;">
         <div class="col-md-3">
@@ -21,13 +25,17 @@
           <BaseDate :date="order.createdAt" :format="'short'" data-test="details-order-date" />
         </div>
         <div class="col-md-5">
-          <router-link :to="{
-            name: 'return',
-            params: { id: order.id },
-          }" v-if="showReturnItemButton && hasItemsAbleToReturn
-  ">
+          <div v-if="order.paymentState == 'Paid'">
+            <router-link :to="{ name: 'return', params: { id: order.id }, }"
+              v-if="showReturnItemButton && hasItemsAbleToReturn">
+              <button data-test="return-button" class="float-right">
+                {{ t('return') }}
+              </button>
+            </router-link>
+          </div>
+          <router-link :to="'/pay?id=' + order.id + '&v=' + order.version" v-else>
             <button data-test="return-button" class="float-right">
-              {{ t('return') }}
+              Pay
             </button>
           </router-link>
         </div>

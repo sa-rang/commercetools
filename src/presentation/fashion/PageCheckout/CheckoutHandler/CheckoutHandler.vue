@@ -2,14 +2,14 @@
     <div>
         <div class="checkout-hanlder">
             <div class="container">
-
-                <div class="row">
-                    <div class="col-lg-6 offset-lg-3">
+                <div class="row" v-if="!orderComplete">
+                    <div class="col-lg-6 offset-lg-3 ">
                         <Payment v-if="!loading && order.totalPrice" :amount="order.totalPrice"
                             @payment-status="paymentStatusAndPlaceOrder" />
+
                     </div>
                 </div>
-                <div class="row" v-if="orderComplete">
+                <div class="row" v-else>
                     <div v-if="paymentStatus == 1" class="col-lg-6 offset-lg-3 mt-50 text-center">
                         <h2>Thank You</h2>
                         <p>Your order <b>{{ orderData.orderNumber }}</b> has been placed successfully.</p>
@@ -25,7 +25,6 @@
                             </router-link> -->
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -33,7 +32,7 @@
 
 <script >
 import Payment from 'presentation/PageCheckout/Payment/Payment.vue';
-import { onMounted, shallowRef } from 'vue';
+import { onMounted, shallowRef, watch } from 'vue';
 import useCartTools from 'hooks/useCartTools';
 import { useRoute } from 'vue-router';
 import useMyOrderBasic from 'hooks/ct/useMyOrder';
@@ -56,7 +55,14 @@ export default {
             locale,
             id: route.query.id,
         });
+        watch(order, (iOrder) => {
+            if (iOrder?.paymentState == "Paid") {
+                orderData.value = iOrder
+                orderComplete.value = true
+                paymentStatus.value = 1
 
+            }
+        });
         onMounted(async () => {
         });
 
@@ -109,6 +115,7 @@ export default {
 .checkout-hanlder {
     margin-top: 50px;
     margin-bottom: 100px;
+    min-height: 550px;
 }
 </style>
   
