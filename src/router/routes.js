@@ -7,6 +7,7 @@ import Product from 'presentation/PageProductDetail/PageProductDetail.vue';
 import Checkout from 'presentation/PageCheckout/PageCheckout.vue';
 // import Pay from 'presentation/Pay/Pay.vue';
 import CheckoutHandler from 'presentation/PageCheckout/CheckoutHandler/CheckoutHandler.vue';
+import ThankYou from 'presentation/PageCheckout/OrderSummery/ThankYou.vue';
 import Login from 'presentation/Login/Login.vue';
 import User from 'presentation/User/User.vue';
 import TabDashboard from 'presentation/User/TabDashboard/TabDashboard.vue';
@@ -78,6 +79,16 @@ export default [
         components: {
           default: CheckoutHandler,
           // header: Header,
+          footer: Footer,
+        },
+      },
+      {
+        path: 'thankyou',
+        name: 'thankyou',
+        // meta: { requiresCart },
+        components: {
+          default: ThankYou,
+          header: Header,
           footer: Footer,
         },
       },

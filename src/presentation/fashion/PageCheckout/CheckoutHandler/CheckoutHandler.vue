@@ -2,27 +2,16 @@
     <div>
         <div class="checkout-hanlder">
             <div class="container">
-                <div class="row" v-if="!orderComplete">
+                <div class="row" v-if="loadPaymentInterface">
                     <div class="col-lg-6 offset-lg-3 ">
                         <Payment v-if="!loading && order.totalPrice" :amount="order.totalPrice"
                             @payment-status="paymentStatusAndPlaceOrder" />
 
                     </div>
                 </div>
-                <div class="row" v-else>
-                    <div v-if="paymentStatus == 1" class="col-lg-6 offset-lg-3 mt-50 text-center">
-                        <h2>Thank You</h2>
-                        <p>Your order <b>{{ orderData.orderNumber }}</b> has been placed successfully.</p>
-                        <router-link class=" btn-grey mt-50" to="/">
-                            Continue Shopping
-                        </router-link>
-                    </div>
-                    <div v-else class="col-lg-6 offset-lg-3">
-                        <h2>Error in Payment </h2>
-                        <!-- <p>But your order has been placed successfully. Please do payment retry.</p>
-                            <router-link class="mt-50" to="/">
-                                Continue Shopping
-                            </router-link> -->
+                <div class="row" v-if="orderTransMsg">
+                    <div class="col-lg-6 offset-lg-3">
+                        <h3>{{ orderTransMsg }}</h3>
                     </div>
                 </div>
             </div>
@@ -34,7 +23,7 @@
 import Payment from 'presentation/PageCheckout/Payment/Payment.vue';
 import { onMounted, shallowRef, watch } from 'vue';
 import useCartTools from 'hooks/useCartTools';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import useMyOrderBasic from 'hooks/ct/useMyOrder';
 import useLocale from 'hooks/useLocale';
 
@@ -44,11 +33,11 @@ export default {
     },
 
     setup() {
-        const orderComplete = shallowRef(false);
-        const orderData = shallowRef(null)
-        const paymentStatus = shallowRef(false);
         const cartTools = useCartTools();
         const route = useRoute();
+        const router = useRouter();
+        const orderTransMsg = shallowRef(null);
+        const loadPaymentInterface = shallowRef(false);
 
         const { locale } = useLocale();
         const { loading, order } = useMyOrderBasic({
@@ -57,10 +46,9 @@ export default {
         });
         watch(order, (iOrder) => {
             if (iOrder?.paymentState == "Paid") {
-                orderData.value = iOrder
-                orderComplete.value = true
-                paymentStatus.value = 1
-
+                gotoThankYou(iOrder?.orderNumber)
+            } else {
+                loadPaymentInterface.value = true
             }
         });
         onMounted(async () => {
@@ -68,30 +56,28 @@ export default {
 
         const paymentStatusAndPlaceOrder = async (iPayData) => {
             //take payment status and data and create order resultCode
-            console.log("AdyenPay", iPayData)
+            // switch (iPayData.resultCode) {
+            //     case "Authorised":
 
-            switch (iPayData.resultCode) {
-                case "Authorised":
-                    paymentStatus.value = 1
 
-                    //window.location.href = "/result/success";
-                    break;
-                case "Pending":
-                case "Received":
-                    paymentStatus.value = 2
-                    //window.location.href = "/result/pending";
+            //         //window.location.href = "/result/success";
+            //         break;
+            //     case "Pending":
+            //     case "Received":
 
-                    break;
-                case "Refused":
-                    paymentStatus.value = 3
-                    //window.location.href = "/result/failed";
+            //         //window.location.href = "/result/pending";
 
-                    break;
-                default:
-                    paymentStatus.value = 4
-                    // window.location.href = "/result/error";
-                    break;
-            }
+            //         break;
+            //     case "Refused":
+
+            //         //window.location.href = "/result/failed";
+
+            //         break;
+            //     default:
+
+            //         // window.location.href = "/result/error";
+            //         break;
+            // }
 
             cartTools.createPaymentAndUpdateOrder({
                 method: iPayData.payMethod,
@@ -102,11 +88,24 @@ export default {
                 orderVersion: parseInt(route.query.v),
 
             }).then(({ data }) => {
-                orderData.value = data?.updateOrder
-                orderComplete.value = true;
+                let orderData = data?.updateOrder
+                if (orderData && orderData?.orderNumber && orderData?.orderState == "Confirmed") {
+                    gotoThankYou(data?.updateOrder?.orderNumber)
+                } else {
+                    orderTransMsg.value = "Order not confirmed!"
+                }
             }).catch((error) => console.warn('error:', error));
         }
-        return { orderComplete, orderData, paymentStatus, loading, order, paymentStatusAndPlaceOrder }
+
+        const gotoThankYou = (orderNumber) => {
+            router.push({
+                name: 'thankyou',
+                query: {
+                    id: orderNumber
+                }
+            });
+        }
+        return { loading, order, orderTransMsg, loadPaymentInterface, paymentStatusAndPlaceOrder }
     }
 }
 </script>
@@ -115,7 +114,7 @@ export default {
 .checkout-hanlder {
     margin-top: 50px;
     margin-bottom: 100px;
-    min-height: 550px;
+    min-height: 300px;
 }
 </style>
   
