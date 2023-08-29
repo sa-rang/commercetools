@@ -15,9 +15,9 @@
               </div>
               <div class="footer-info">
                 <ul>
-                  <li><a href="#">+49 (899) 9829960</a></li>
-                  <li><a href="#">info@example.com</a></li>
-                  <li>PO Box 1622 Colins Street West</li>
+                  <li><a href="#">+44 20.3744 0011</a></li>
+                  <li><a href="#">sales@aiopsgroup.com</a></li>
+                  <li>69 Bulgaria Blvd., Building B, F7 1404 Sofia, Bulgaria</li>
                 </ul>
               </div>
               <div class="footer-map">

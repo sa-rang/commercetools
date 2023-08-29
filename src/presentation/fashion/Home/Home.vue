@@ -12,7 +12,7 @@
             <div class="banner-wrap mb-30 wow fadeIn" data-wow-duration="1s" data-wow-delay="0.2s">
               <div class="banner-img banner-hover banner-zoom">
                 <router-link to="/products/women?q=women+jeans">
-                  <img src="../assets/img/jeans1.webp" alt="banner" />
+                  <img src="../assets/img/wjeans.webp" alt="banner" />
                   <div class="banner-content">
                     <h3>{{ t('w_jeans') }}</h3>
                   </div>
@@ -24,7 +24,7 @@
             <div class="banner-wrap mb-30 wow fadeIn" data-wow-duration="1s" data-wow-delay="0.2s">
               <div class="banner-img banner-hover banner-zoom">
                 <router-link to="/products/all?q=sneakers">
-                  <img src="../assets/img/sho3.jpg" alt="banner" />
+                  <img src="../assets/img/sneaker.jpg" alt="banner" />
                   <div class="banner-content">
                     <h3>{{ t('sneakers') }}</h3>
                   </div>
@@ -34,7 +34,7 @@
             <div class="banner-wrap mb-30 wow fadeIn" data-wow-duration="1s" data-wow-delay="0.3s">
               <div class="banner-img banner-hover banner-zoom">
                 <router-link to="/products/all?q=bags">
-                  <img src="../assets/img/acc.jpg" alt="banner" />
+                  <img src="../assets/img/bags.jpg" alt="banner" />
                   <div class="banner-content">
                     <h3>{{ t('accessories') }}</h3>
                   </div>
@@ -45,8 +45,8 @@
           <div class="col-lg-4 col-md-4 col-xs-12">
             <div class="banner-wrap mb-30 wow fadeIn" data-wow-duration="1s" data-wow-delay="0.2s">
               <div class="banner-img banner-hover banner-zoom">
-                <router-link to="/products/sale">
-                  <img src="../assets/img/s3.jpg" alt="banner" />
+                <router-link to="products/all?q=jacket">
+                  <img src="../assets/img/jacket.jpg" alt="banner" />
                   <div class="banner-content">
                     <h3>{{ t('bathing_suits') }}</h3>
                   </div>
