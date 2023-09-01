@@ -1,4 +1,5 @@
-import { useQuery } from '@vue/apollo-composable';
+import { useQuery, provideApolloClient } from '@vue/apollo-composable';
+import { apolloClient } from '../src/apollo';
 import { computed, ref, watch } from 'vue';
 import { getValue } from '../src/lib';
 //for some reason someone did not only thought it would
@@ -20,6 +21,9 @@ export default (
   query,
   { variables, onCompleted, ...options }
 ) => {
+
+
+  provideApolloClient(apolloClient);
   const newOptions = useFixOptions(options);
   const data = ref();
   const { result, loading, error } = useQuery(

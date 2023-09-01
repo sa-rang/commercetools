@@ -32,9 +32,8 @@ const query = (expand) => gql`
         productId: id
         name(locale: $locale)
         slug(locale: $locale)
-        ${
-          expand.variants
-            ? `variants {
+        ${expand.variants
+    ? `variants {
           variantId: id
           sku
           images {
@@ -63,8 +62,8 @@ const query = (expand) => gql`
             country
           }
         }`
-            : ''
-        }
+    : ''
+  }
         masterVariant {
           # better never select id or cache breaks
           # https://github.com/apollographql/apollo-client/issues/9429
@@ -145,26 +144,26 @@ const updateFilters = (
     .concat(
       sku
         ? {
-            model: {
-              value: {
-                path: 'variants.sku',
-                values: [sku],
-              },
+          model: {
+            value: {
+              path: 'variants.sku',
+              values: [sku],
             },
-          }
+          },
+        }
         : undefined
     )
     .concat(
       categorySlug && categoryId
         ? {
-            model: {
-              tree: {
-                path: 'categories.id',
-                rootValues: [],
-                subTreeValues: [categoryId],
-              },
+          model: {
+            tree: {
+              path: 'categories.id',
+              rootValues: [],
+              subTreeValues: [categoryId],
             },
-          }
+          },
+        }
         : undefined
     )
     .filter((f) => f);
@@ -178,15 +177,15 @@ const createPriceSelector = (
   country: getValue(country),
   channel: getValue(channel)
     ? {
-        typeId: 'priceChannel',
-        id: getValue(channel).id,
-      }
+      typeId: 'priceChannel',
+      id: getValue(channel).id,
+    }
     : null,
   customerGroup: getValue(customerGroup)
     ? {
-        id: getValue(customerGroup),
-        typeId: 'customer-group',
-      }
+      id: getValue(customerGroup),
+      typeId: 'customer-group',
+    }
     : null,
 });
 //this is the React api useQuery(query,options)

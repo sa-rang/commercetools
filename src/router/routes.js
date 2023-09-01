@@ -22,6 +22,7 @@ import Cart from 'presentation/CartDetail/CartDetail.vue';
 import Home from 'presentation/Home/Home.vue';
 import StoreLocator from 'presentation/Stores/StoreLocator.vue';
 import ContactUs from "presentation/ContactUs/ContactUs.vue"
+import Search from "presentation/Search/Search.vue"
 
 const requiresAuth = true;
 export default [
@@ -193,6 +194,15 @@ export default [
         name: 'contact-us',
         components: {
           default: ContactUs,
+          header: Header,
+          footer: Footer,
+        },
+      },
+      {
+        path: 'search',
+        name: 'search',
+        components: {
+          default: Search,
           header: Header,
           footer: Footer,
         },
