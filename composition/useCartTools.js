@@ -18,14 +18,15 @@ function subTotal(cartLike) {
     priceCentAmount === totalPriceCentAmount
       ? {}
       : {
-          discounted: {
-            value: {
-              centAmount: totalPriceCentAmount,
-              currencyCode,
-              fractionDigits,
-            },
+        discounted: {
+          value: {
+            centAmount: totalPriceCentAmount,
+            currencyCode,
+            fractionDigits,
+            percentDiscount: ((priceCentAmount - totalPriceCentAmount) / priceCentAmount * 100) + "% off"
           },
-        };
+        },
+      };
   return {
     value: {
       centAmount: priceCentAmount,

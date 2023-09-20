@@ -7,12 +7,16 @@
       <BaseMoney :money="originalPrice" />
     </span>
     <span v-else>
+
+      <span data-test="price-new-value" class="new-price">
+        <BaseMoney :money="discountedPrice" />
+
+      </span>
+
       <span data-test="price-old-value" class="old-price">
         <BaseMoney :money="originalPrice" />
       </span>
-      <span data-test="price-new-value" class="new-price">
-        <BaseMoney :money="discountedPrice" />
-      </span>
+      <span class="discount-percent">({{ discountedPrice.percentDiscount }})</span>
     </span>
   </span>
 </template>

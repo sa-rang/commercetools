@@ -38,8 +38,7 @@
             </ul>
             <div class="cart-total">
               <h4>
-                <!-- @todo: when discounted the strikout style is not working -->
-                {{ t('subtotal') }}:
+                <span> {{ t('subtotal') }}:</span>
                 <BasePrice :price="subTotal(cart)" data-test="mini-cart-price" />
               </h4>
             </div>
