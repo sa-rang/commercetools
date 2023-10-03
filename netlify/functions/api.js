@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import serverless from 'serverless-http';
 const dotenv = require("dotenv");
-const { uuid } = require("uuidv4");
+//const { uuid } = require("uuidv4");
 const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-library");
 
 const app = express();
@@ -50,18 +50,19 @@ const remove = (pToken) => {
 /* ################# API ENDPOINTS ###################### */
 
 const router = Router();
-router.get('/hello', (req, res) => res.send('Hello World!'));
 
-router.get('/getUserToken', (req, res) => res.send(getAll()));
+router.get('/api/hello', (req, res) => res.send('Hello World!'));
+router.get('/api/getUserToken', (req, res) => res.json(getAll()));
 
 router.post('/sessions', async (req, res) => {
     try {
         // Unique ref for the transaction
-        const orderRef = uuid();
+        // const orderRef = uuid();
         // Determine host (for setting returnUrl)
         const protocol = req.socket.encrypted ? 'https' : 'http';
         const host = req.get('host');
         const payload = req.body
+        const orderRef = payload.orderNumber;
 
 
         // Ideally the data passed here should be computed based on business logic
@@ -89,6 +90,31 @@ router.post('/sessions', async (req, res) => {
     }
 });
 
+// recurring payment api
+router.post("/api/recpayment", async (req, res) => {
+
+    try {
+        const payload = req.body
+        const orderRef = payload.orderNumber;
+
+        const response = await checkout.payments({
+            amount: { currency: "EUR", value: payload.amount },
+            reference: orderRef,
+            shopperInteraction: "ContAuth", // Continuous Authorization
+            recurringProcessingModel: "Subscription",
+            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+            shopperReference: SHOPPER_REFERENCE,
+            paymentMethod: {
+                storedPaymentMethodId: payload.recReference
+            }
+        });
+        res.json({ response });
+
+    } catch (err) {
+        console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
+        res.status(err.statusCode).json(err.message);
+    }
+});
 
 // Handle all redirects from payment type
 router.all('/handleShopperRedirect', async (req, res) => {

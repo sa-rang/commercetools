@@ -3,10 +3,20 @@
         <div class="checkout-hanlder">
             <div class="container">
                 <div class="row" v-if="loadPaymentInterface">
+
+                    <div v-if="getUserPayTokens" class="col-lg-6 offset-lg-3 ">
+                        <div class="border p-3">
+                            <h3>Use saved payment method</h3>
+                            <div v-for="(eachToken, index) in getUserPayTokens" :key="index">
+                                <p>User Ref: {{ eachToken.shopperReference }}</p>
+                                <p>Payment method: {{ eachToken.paymentMethod }}</p>
+                                <button @click="initiateReccuringPayment(eachToken.recurringDetailReference)">Pay</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-lg-6 offset-lg-3 ">
                         <Payment v-if="!loading && order.totalPrice" :amount="order.totalPrice"
-                            @payment-status="paymentStatusAndPlaceOrder" />
-
+                            :ordernumber="order.orderNumber" @payment-status="addPaymentOnOrder" />
                     </div>
                 </div>
                 <div class="row" v-if="orderTransMsg">
@@ -38,46 +48,25 @@ export default {
         const router = useRouter();
         const orderTransMsg = shallowRef(null);
         const loadPaymentInterface = shallowRef(false);
+        const getUserPayTokens = shallowRef(null);
 
         const { locale } = useLocale();
         const { loading, order } = useMyOrderBasic({
             locale,
             id: route.query.id,
         });
-        watch(order, (iOrder) => {
+        watch(order, async (iOrder) => {
             if (iOrder?.paymentState == "Paid") {
                 gotoThankYou(iOrder?.orderNumber)
             } else {
+                getUserPayTokens.value = await getUserPaymentTokens()
                 loadPaymentInterface.value = true
             }
         });
         onMounted(async () => {
         });
 
-        const paymentStatusAndPlaceOrder = async (iPayData) => {
-            //take payment status and data and create order resultCode
-            // switch (iPayData.resultCode) {
-            //     case "Authorised":
-
-
-            //         //window.location.href = "/result/success";
-            //         break;
-            //     case "Pending":
-            //     case "Received":
-
-            //         //window.location.href = "/result/pending";
-
-            //         break;
-            //     case "Refused":
-
-            //         //window.location.href = "/result/failed";
-
-            //         break;
-            //     default:
-
-            //         // window.location.href = "/result/error";
-            //         break;
-            // }
+        const addPaymentOnOrder = async (iPayData) => {
 
             cartTools.createPaymentAndUpdateOrder({
                 method: iPayData.payMethod,
@@ -105,7 +94,56 @@ export default {
                 }
             });
         }
-        return { loading, order, orderTransMsg, loadPaymentInterface, paymentStatusAndPlaceOrder }
+
+        const getUserPaymentTokens = async () => {
+            try {
+                const url = "/api/getUserToken"
+                const res = await fetch(url);
+                return await res.json();
+            } catch (error) {
+                console.error(error);
+                alert("Error occurred. Look at console for details");
+            }
+        }
+
+        const initiateReccuringPayment = async (iPayRef) => {
+
+            try {
+
+                // setup recurring data
+                let url = "/api/recpayment";
+                let data = {
+                    amount: order.value?.totalPrice.centAmount,
+                    currency: order.value?.totalPrice.currencyCode,
+                    orderNumber: order.value?.orderNumber,
+                    recReference: iPayRef
+                }
+
+                // initiate recurring payment
+                const res = await fetch(url, {
+                    method: "POST",
+                    body: data ? JSON.stringify(data) : "",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const { response } = await res.json();
+                // set payment data on order
+                let payRes = {
+                    payMethod: response?.paymentMethod?.type == "scheme" ? "card" : response?.paymentMethod?.type,
+                    paymentRef: response.pspReference,
+                    resultCode: response.resultCode,
+                    centAmount: response.amount.value,
+                }
+                await addPaymentOnOrder(payRes);
+            } catch (error) {
+                console.error(error);
+                alert("Error occurred. Look at console for details");
+            }
+        }
+
+        return { loading, order, orderTransMsg, loadPaymentInterface, getUserPayTokens, addPaymentOnOrder, initiateReccuringPayment }
     }
 }
 </script>

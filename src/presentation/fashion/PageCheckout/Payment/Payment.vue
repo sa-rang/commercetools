@@ -24,6 +24,10 @@ export default {
             type: Object,
             required: true,
         },
+        ordernumber: {
+            type: String,
+            required: true,
+        }
     },
     setup(props, { emit }) {
         const sessionId = ref("");
@@ -59,7 +63,8 @@ export default {
                     "/api/sessions?type=" + payType,
                     {
                         amount: cartAmount.value.centAmount,
-                        currency: currency.value
+                        currency: currency.value,
+                        orderNumber: props.ordernumber
                     }
                 );
                 // Create AdyenCheckout using Sessions response
