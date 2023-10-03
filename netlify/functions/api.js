@@ -51,8 +51,8 @@ const remove = (pToken) => {
 
 const router = Router();
 
-router.get('/api/hello', (req, res) => res.send('Hello World!'));
-router.get('/api/getUserToken', (req, res) => res.json(getAll()));
+router.get('/hello', (req, res) => res.send('Hello World!'));
+router.get('/getUserToken', (req, res) => res.json(getAll()));
 
 router.post('/sessions', async (req, res) => {
     try {
@@ -91,7 +91,7 @@ router.post('/sessions', async (req, res) => {
 });
 
 // recurring payment api
-router.post("/api/recpayment", async (req, res) => {
+router.post("/recpayment", async (req, res) => {
 
     try {
         const payload = req.body
