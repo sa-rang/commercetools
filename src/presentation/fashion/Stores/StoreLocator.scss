@@ -2,6 +2,7 @@
   height: 120px;
   width: 60%;
 }
+
 #place-input {
   width: 60%;
   margin-right: 20px;
@@ -29,11 +30,7 @@
   padding-top: 20px;
 }
 
-#store-finder-modal {
-  .modal-dialog {
-    width: 75%;
-  }
-}
+
 
 .store-finder-wrapper {
   background-color: $white;
@@ -74,10 +71,12 @@
     letter-spacing: 1px;
     color: #4bb543;
   }
+
   .vue-map-container {
     height: 655px;
     width: 100%;
   }
+
   .map {
     width: 60%;
     background: $gray;
@@ -91,6 +90,7 @@
       height: 655px;
       width: 100%;
       float: left;
+
       @media screen and (max-width: 991px) {
         height: 400px;
       }
@@ -109,6 +109,7 @@
     height: 500px;
     overflow: scroll;
     padding: 0;
+
     @media screen and (max-width: 991px) {
       width: 100%;
     }
@@ -149,6 +150,7 @@
         text-align: right;
         text-decoration: line-through;
       }
+
       .title {
         width: 100%;
         font-size: 16px;
@@ -165,6 +167,7 @@
           width: 40%;
           float: left;
         }
+
         &-content {
           width: 60%;
           float: left;
@@ -202,10 +205,12 @@
         }
       }
     }
+
     /* custom Scrollbar spacing */
-    .mCSB_inside > .mCSB_container {
+    .mCSB_inside>.mCSB_container {
       margin-right: 0;
     }
+
     .mCSB_scrollTools {
       width: 2px;
     }

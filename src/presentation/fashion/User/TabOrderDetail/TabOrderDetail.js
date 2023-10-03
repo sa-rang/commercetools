@@ -8,6 +8,8 @@ import { useI18n } from 'vue-i18n';
 import translation from './TabOrderDetail.json'
 import useCustomerTools from 'hooks/useCustomerTools';
 import useAccessRules from 'hooks/useAccessRules';
+import useCartTools from 'hooks/useCartTools';
+import { useRouter } from 'vue-router';
 
 export default {
   components: {
@@ -63,6 +65,31 @@ export default {
         paymentStatus: order.value?.paymentState,
       }
     });
+
+    const cartTools = useCartTools();
+    const router = useRouter();
+
+
+    const modifyOrder = (iOderId, iOderVersion) => {
+      return Promise.resolve()
+        .then(() => {
+          return cartTools.setOrderStatusCancelled({ orderId: iOderId, orderVersion: iOderVersion })
+        })
+        .then(() => {
+          return cartTools.replicateCart({ orderId: iOderId })
+        }).then(({ id }) => {
+          console.log("ok", id)
+          if (id) {
+            router.push({
+              name: 'cart'
+            });
+          }
+        }).catch((err) => console.warn('error:', err))
+
+
+
+    }
+
     return {
       t,
       subtotal,
@@ -70,6 +97,7 @@ export default {
       order,
       loading,
       showReturnItemButton,
+      modifyOrder
     };
   },
 };

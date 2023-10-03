@@ -1,6 +1,6 @@
-<style src="./ProductThumbnail.scss" lang="scss"></style>
+<style src="./ProductThumbnail.scss" lang="scss" ></style>
 <script src="./ProductThumbnail.js"></script>
-
+ 
 <template>
   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
     <div class="product-wrap ">

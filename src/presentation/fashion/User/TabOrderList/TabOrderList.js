@@ -39,7 +39,7 @@ export default {
     // }
 
     const paymentInfo = (order) => {
-      return order?.paymentState ? t(order?.paymentState) : ""
+      return order?.paymentState ? t(order?.paymentState) : "Pending"
     }
 
     return {

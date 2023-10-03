@@ -2,8 +2,8 @@ import { shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import translation from './Pay.json'
 import { useRoute } from 'vue-router';
-import useCart from '../../../../composition/useCart';
-import useCartTools from '../../../../composition/useCartTools';
+import useCart from 'hooks/composition/useCart';
+import useCartTools from 'hooks/composition/useCartTools';
 
 export default {
   // props: {

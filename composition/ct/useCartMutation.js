@@ -83,7 +83,7 @@ export const createPaymentV2 = ({
 
 
 
-export const addPaymentOnOrder = ({ orderId, orderNumber, version, paymentId, CTorderStatus, CTpayStatus }) => {
+export const addPaymentOnOrder = ({ orderId, version, paymentId, CTorderStatus, CTpayStatus }) => {
   return apolloClient.mutate({
     mutation: gql`
           mutation addPaymentOnOrder(
@@ -116,8 +116,6 @@ export const addPaymentOnOrder = ({ orderId, orderNumber, version, paymentId, CT
         },
         {
           changePaymentState: { paymentState: CTpayStatus }
-        }, {
-          setOrderNumber: { orderNumber: orderNumber }
         }
       ]
 
@@ -191,7 +189,7 @@ export const createMyOrderFromCart = (id, version) => {
         createMyOrderFromCart(
           draft: { id: $id, version: $version }
         ) {
-          cartId: id
+          orderId: id
           version
         }
       }
@@ -242,6 +240,7 @@ const useCartMutation = ({ location, currency }) => {
     return Promise.resolve()
       .then(() => {
         if (!getValue(exist) === true) {
+          console.log("Cart Creation")
           return createCart({
             variables: {
               draft: {
@@ -252,11 +251,15 @@ const useCartMutation = ({ location, currency }) => {
                 },
               },
             },
-          }).then((result) => ({
-            version: result.data.createMyCart.version,
-            id: result.data.createMyCart.cartId,
-          }));
+          }).then((result) => {
+            console.log("new cart ", result.data.createMyCart.cartId)
+            return {
+              version: result.data.createMyCart.version,
+              id: result.data.createMyCart.cartId,
+            }
+          });
         }
+        console.log("Existing cart ", getValue(cart).cartId)
         return {
           version: getValue(cart).version,
           id: getValue(cart).cartId,
@@ -307,3 +310,95 @@ const useCartMutation = ({ location, currency }) => {
 };
 
 export default useCartMutation;
+
+
+export const replicateCartMutation = ({ orderId }) =>
+  apolloClient
+    .mutate({
+      mutation: gql`
+            mutation replicateMyCart($reference: ReferenceInput!) {
+              replicateMyCart(reference: $reference) {
+                cartId: id
+                version
+              }
+            }
+          `,
+      variables: {
+        reference: {
+          id: orderId,
+          typeId: "order"
+        },
+      },
+    })
+    .then((result) => ({
+      version: result.data.replicateMyCart.version,
+      id: result.data.replicateMyCart.cartId,
+    }));
+
+
+
+export const addOrderNumberUpdateOrder = ({ orderId, orderNumber, version }) => {
+  return apolloClient.mutate({
+    mutation: gql`
+          mutation addOrderNumberOnOrder(
+            $orderId: String
+            $version: Long!
+            $actions:[OrderUpdateAction!]!
+          ) {
+            updateOrder(
+              version: $version
+              id: $orderId
+              actions: $actions
+            ) {
+              orderId:id
+              orderNumber
+              version
+            }
+          }
+        `,
+    variables: {
+      orderId,
+      version,
+      actions: [
+        {
+          setOrderNumber: { orderNumber: orderNumber }
+        },
+        {
+          changeOrderState: { orderState: "Open" }
+        },
+      ]
+    }
+  });
+};
+
+export const updateOrderStatus = ({ orderId, version, CTorderStatus }) => {
+  return apolloClient.mutate({
+    mutation: gql`
+          mutation addPaymentOnOrder(
+            $orderId: String
+            $version: Long!
+            $actions:[OrderUpdateAction!]!
+          ) {
+            updateOrder(
+              version: $version
+              id: $orderId
+              actions: $actions
+            ) {
+              orderId:id
+              orderNumber
+              orderState
+            }
+          }
+        `,
+    variables: {
+      orderId,
+      version,
+      actions: [
+        {
+          changeOrderState: { orderState: CTorderStatus }
+        }
+      ]
+
+    },
+  });
+};

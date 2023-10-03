@@ -1,3 +1,4 @@
+import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import translations from "./CartDetail.json"
 import Spinner from 'presentation/components/Spinner/Spinner.vue';
@@ -20,12 +21,21 @@ export default {
     const { t } = useI18n({
       messages: translations
     });
-    const { cart, loading, error } = useCart();
+    const { cart, loading, error, exist, loadCart } = useCart();
+    onMounted(() => {
+      console.log("cart-exist", exist.value)
+      if (!exist.value) {
+        console.log("cartdetails: load cart")
+        loadCart()
+      }
+    });
+
     return {
       t,
       cart,
       loading,
       error,
+      exist,
       ...useCartTools(),
     };
   },

@@ -1,4 +1,4 @@
-import org, { createPayment, createPaymentV2, addPaymentOnOrder } from './ct/useCartMutation';
+import org, { createPayment, createPaymentV2, addPaymentOnOrder, addOrderNumberUpdateOrder, replicateCartMutation, updateOrderStatus } from './ct/useCartMutation';
 import useCurrency from './useCurrency';
 import useLocation from './useLocation';
 import {
@@ -30,6 +30,7 @@ export {
   setShippingAddress,
   createMyOrderFromCart,
 };
+
 const useCartMutation = () => {
   const { location } = useLocation();
   const currency = useCurrency();
@@ -134,11 +135,16 @@ export const useCartActions = () => {
           country: location.value,
         }),
       ];
-      return mutateCart(actions).then(({ data }) => {
+      return mutateCart(actions).then(({ data }) => {//set billing shipping with actions
         const { id, version } = data.updateMyCart;
+        //create order
         return apolloClient.mutate(
           createMyOrderFromCart(id, version)
         );
+      }).then(({ data }) => { //set odernumber from FE
+        let orderNumber = "AiOPS-" + new Date().valueOf();
+        // link payment to order in CT
+        return addOrderNumberUpdateOrder({ orderId: data.createMyOrderFromCart.orderId, orderNumber, version: data.createMyOrderFromCart.version })
       })
     });
   };
@@ -147,7 +153,7 @@ export const useCartActions = () => {
 
     let CTorderStatus = "Open" // Confirmed Complete Cancelled
     let CTpayStatus = "Pending" // BalanceDue CreditOwed Failed Paid
-    let orderNumber = "AiOPS-" + new Date().valueOf();
+    //let orderNumber = "AiOPS-" + new Date().valueOf();
 
     if (payStatus == "Authorised") {
       CTorderStatus = "Confirmed"
@@ -164,8 +170,18 @@ export const useCartActions = () => {
     })
       .then(({ id }) => {
         // link payment to order in CT
-        return addPaymentOnOrder({ orderId: orderId, orderNumber, version: orderVersion, paymentId: id, CTorderStatus, CTpayStatus })
+        return addPaymentOnOrder({ orderId: orderId, version: orderVersion, paymentId: id, CTorderStatus, CTpayStatus })
       })
+  };
+
+  const setOrderStatusCancelled = ({ orderId, orderVersion }) => {
+    let CTorderStatus = "Cancelled"
+    return updateOrderStatus({ orderId: orderId, version: orderVersion, CTorderStatus })
+  };
+
+
+  const replicateCart = ({ orderId }) => {
+    return replicateCartMutation({ orderId: orderId })
   };
 
 
@@ -182,6 +198,8 @@ export const useCartActions = () => {
     setShippingAddress: setShipping,
     createMyOrderFromCart: createMyOrder,
     setAddressForCartAndCreateOrder,
-    createPaymentAndUpdateOrder
+    createPaymentAndUpdateOrder,
+    replicateCart,
+    setOrderStatusCancelled
   };
 };

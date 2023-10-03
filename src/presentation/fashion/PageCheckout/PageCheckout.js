@@ -43,11 +43,12 @@ export default {
           shippingAddress,
         })
         .then(({ data }) => {
+          console.log("upadte", data)
           router.push({
             name: 'pay',
             query: {
-              id: data.createMyOrderFromCart.cartId,
-              v: data.createMyOrderFromCart.version
+              id: data.updateOrder.orderId,
+              v: data.updateOrder.version
             }
           });
         })

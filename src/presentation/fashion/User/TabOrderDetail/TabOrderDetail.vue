@@ -10,10 +10,6 @@
         <span v-if="order.orderNumber" data-test="details-order-number" style="margin-left: 150px;">
           {{ order.orderNumber }} ({{ order.orderState }})
         </span>
-        <span v-if="!order.paymentState || order.paymentState == 'Pending'" data-test="details-order-number"
-          style="margin-left: 300px;">
-          Payment Pending
-        </span>
       </h3>
       <div class="row your-order-details" style="font-size: 14px;">
         <div class="col-md-3">
@@ -24,20 +20,29 @@
           <!-- @todo: base date is broken i18n does not work -->
           <BaseDate :date="order.createdAt" :format="'short'" data-test="details-order-date" />
         </div>
-        <div class="col-md-5">
-          <div v-if="order.paymentState == 'Paid'">
-            <router-link :to="{ name: 'return', params: { id: order.id }, }"
-              v-if="showReturnItemButton && hasItemsAbleToReturn">
-              <button data-test="return-button" class="float-right">
-                {{ t('return') }}
+        <div class="col-md-5 d-flex">
+          <!-- Button trigger modal -->
+
+          <div v-if="order.orderState != 'Cancelled'">
+            <div v-if="order.paymentState == 'Paid'" class="d-inline">
+              <router-link :to="{ name: 'return', params: { id: order.id }, }"
+                v-if="showReturnItemButton && hasItemsAbleToReturn">
+                <button data-test="return-button" class="">
+                  {{ t('return') }}
+                </button>
+              </router-link>
+            </div>
+            <router-link :to="'/pay?id=' + order.id + '&v=' + order.version" v-else>
+              <button data-test="return-button" class="">
+                Pay
               </button>
             </router-link>
           </div>
-          <router-link :to="'/pay?id=' + order.id + '&v=' + order.version" v-else>
-            <button data-test="return-button" class="float-right">
-              Pay
+          <div v-if="order.orderState == 'Open' || order.orderState == 'Confirmed' || order.orderState == 'Cancelled'">
+            <button class="ml-1" data-toggle="modal" data-target="#exampleModal">
+              Modify
             </button>
-          </router-link>
+          </div>
         </div>
       </div>
       <div class="row pt-30">
@@ -116,6 +121,28 @@
     </div>
     <div class="pt-50 pb-55" v-if="!loading && !order">
       <h1 class="text-center">{{ t('notFound') }}</h1>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Modification in order will cancel the current order. Are you sure you want to modify?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal"
+              @click="modifyOrder(order.id, order.version)">Modify Order</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

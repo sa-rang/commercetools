@@ -13,7 +13,7 @@
             <th>{{ t('date') }}</th>
             <th>{{ t('total') }}</th>
             <th>{{ t('paymentStatus') }}</th>
-            <th>{{ t('shipmentStatus') }}</th>
+            <th>{{ t('orderStatus') }}</th>
             <th></th>
           </tr>
         </thead>
@@ -33,7 +33,7 @@
               {{ paymentInfo(order) }}
             </td>
             <td data-test="shipment-state">
-              {{ translateStatus(order.shipmentState) }}
+              {{ translateStatus(order.orderState) }}
 
             </td>
             <td>

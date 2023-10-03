@@ -13,6 +13,7 @@ const query = gql`
         results {
           orderId: id
           orderNumber
+          orderState
           totalPrice {
             centAmount
             currencyCode

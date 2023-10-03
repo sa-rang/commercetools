@@ -123,16 +123,30 @@ const query = gql`
 const useCart = ({ locale }) => {
   const [cart, setCart] = useState();
   const [exist, setExist] = useState();
+  // const { loading, error } = useQueryFacade(query, {
+  //   variables: { locale },
+  //   onCompleted: (data) => {
+  //     if (!data) {
+  //       return;
+  //     }
+  //     setCart(data.myCart.activeCart);
+  //   },
+  // });
+  const loadCart = () => {
+    console.log("loadCart called")
+    return useQueryFacade(query, {
+      variables: { locale },
+      onCompleted: (data) => {
+        if (!data) {
+          return;
+        }
+        console.log("loadCart setCart reached")
+        setCart(data.myCart.activeCart);
+      },
+    });
+  }
+  const { loading, error } = loadCart()
 
-  const { loading, error } = useQueryFacade(query, {
-    variables: { locale },
-    onCompleted: (data) => {
-      if (!data) {
-        return;
-      }
-      setCart(data.myCart.activeCart);
-    },
-  });
   useEffect(
     () =>
       setExist(
@@ -142,6 +156,8 @@ const useCart = ({ locale }) => {
       ),
     [cart, loading, error]
   );
-  return { cart, exist, loading, error };
+  return { cart, exist, loading, error, loadCart };
 };
+
+
 export default useCart;
