@@ -37,12 +37,13 @@ const checkout = new CheckoutAPI(client);
 
 //------------------------------- recurring payment code---------------------------
 
-const SHOPPER_REFERENCE = "AiopsShopper_IOfW3k9G2PvXFu2j";
-var tokens = [{
-    recurringDetailReference: "F3NH25PS3GCM9J65",
-    paymentMethod: "visa",
-    shopperReference: "AiopsShopper_IOfW3k9G2PvXFu2j"
-}];
+const SHOPPER_REFERENCE = "Rafael@aiops.com";
+// var tokens = [{
+//     recurringDetailReference: "F3NH25PS3GCM9J65",
+//     paymentMethod: "visa",
+//     shopperReference: "AiopsShopper_IOfW3k9G2PvXFu2j"
+// }];
+var tokens = []
 
 const getAll = () => {
     return tokens

@@ -4,7 +4,7 @@
             <div class="container">
                 <div class="row" v-if="loadPaymentInterface">
 
-                    <div v-if="getUserPayTokens" class="col-lg-6 offset-lg-3 ">
+                    <div v-if="getUserPayTokens && getUserPayTokens.length > 0" class="col-lg-6 offset-lg-3 ">
                         <div class="border p-3">
                             <h3>Use saved payment method</h3>
                             <div v-for="(eachToken, index) in getUserPayTokens" :key="index">
