@@ -62,7 +62,11 @@ app.post("/api/sessions", async (req, res) => {
                 { quantity: 1, amountIncludingTax: 5000, description: "Sunglasses" },
                 { quantity: 1, amountIncludingTax: 5000, description: "Headphones" }
             ],
-            returnUrl: `${protocol}://${host}/api/handleShopperRedirect?orderRef=${orderRef}` // Required `returnUrl` param: Set redirect URL required for some payment methods
+            returnUrl: `${protocol}://${host}/api/handleShopperRedirect?orderRef=${orderRef}`, // Required `returnUrl` param: Set redirect URL required for some payment methods
+            // recurring payment settings
+            shopperInteraction: "Ecommerce",
+            recurringProcessingModel: "Subscription",
+            enableRecurring: true
         });
         res.json({ response, clientKey: process.env.ADYEN_CLIENT_KEY });
     } catch (err) {
@@ -137,9 +141,11 @@ app.post("/api/webhooks/notifications", async (req, res) => {
 // Process payload
 function consumeEvent(notification) {
     // Add item to DB, queue or different thread, we just log it for now
-    const merchantReference = notification.merchantReference;
-    const eventCode = notification.eventCode;
-    console.log('merchantReference:' + merchantReference + " eventCode:" + eventCode);
+    //const merchantReference = notification.merchantReference;
+    //const eventCode = notification.eventCode;
+    console.log("-- webhook payload ------");
+    console.log(notification);
+    //console.log('merchantReference:' + merchantReference + " eventCode:" + eventCode);
 }
 
 
