@@ -24,10 +24,35 @@ client.setEnvironment("TEST");
 const checkout = new CheckoutAPI(client);
 
 
+
+//------------------------------- recurring payment code---------------------------
+
+const SHOPPER_REFERENCE = "AiopsShopper_IOfW3k9G2PvXFu2j";
+var tokens = [];
+
+const getAll = () => {
+    return tokens
+}
+
+const put = (pToken, pPaymentMethod, pShopperReference) => {
+    tokens.push({ recurringDetailReference: pToken, paymentMethod: pPaymentMethod, shopperReference: pShopperReference })
+    console.log("UserToken", tokens)
+}
+
+const remove = (pToken) => {
+    let indexToRemove = tokens.findIndex(obj => obj.recurringDetailReference === pToken);
+    tokens.splice(indexToRemove, 1)[0];
+}
+
+//------------------------------------------------------------------------------------------
+
+
 /* ################# API ENDPOINTS ###################### */
 
 const router = Router();
 router.get('/hello', (req, res) => res.send('Hello World!'));
+
+router.get('/getUserToken', (req, res) => res.send(getAll()));
 
 router.post('/sessions', async (req, res) => {
     try {
@@ -52,6 +77,7 @@ router.post('/sessions', async (req, res) => {
             ],
             returnUrl: `${protocol}://${host}/api/handleShopperRedirect?orderRef=${orderRef}`, // Required `returnUrl` param: Set redirect URL required for some payment methods
             // recurring payment settings
+            shopperReference: SHOPPER_REFERENCE,
             shopperInteraction: "Ecommerce",
             recurringProcessingModel: "Subscription",
             enableRecurring: true
@@ -129,13 +155,39 @@ router.post('/webhooks/notifications', async (req, res) => {
 });
 
 // Process payload
+// function consumeEvent(notification) {
+//     // Add item to DB, queue or different thread, we just log it for now
+//     const merchantReference = notification.merchantReference;
+//     const eventCode = notification.eventCode;
+//     console.log('merchantReference:' + merchantReference + " eventCode:" + eventCode);
+// }
+
+
+
+
 function consumeEvent(notification) {
-    // Add item to DB, queue or different thread, we just log it for now
-    //const merchantReference = notification.merchantReference;
-    //const eventCode = notification.eventCode;
-    console.log("-- webhook payload ------");
-    console.log(notification);
-    //console.log('merchantReference:' + merchantReference + " eventCode:" + eventCode);
+    // valid hmac: process event
+
+    const shopperReference = notification.additionalData['recurring.shopperReference'];
+
+    // read about eventcode "RECURRING_CONTRACT" here: https://docs.adyen.com/online-payments/tokenization/create-and-use-tokens?tab=subscriptions_2#pending-and-refusal-result-codes-1
+    if (notification.eventCode == "RECURRING_CONTRACT" && shopperReference) {
+        // webhook with recurring token
+        const recurringDetailReference = notification.additionalData['recurring.recurringDetailReference'];
+        const paymentMethod = notification.paymentMethod;
+
+        console.log("Recurring authorized - recurringDetailReference:" + recurringDetailReference + " shopperReference:" + shopperReference +
+            " paymentMethod:" + paymentMethod);
+
+        // save token
+        put(recurringDetailReference, paymentMethod, shopperReference)
+
+    } else if (notification.eventCode == "AUTHORISATION") {
+        // webhook with payment authorisation
+        console.log("Payment authorized - pspReference:" + notification.pspReference + " eventCode:" + notification.eventCode);
+    } else {
+        console.log("Unexpected eventCode: " + notification.eventCode);
+    }
 }
 
 app.use('/api/', router);
