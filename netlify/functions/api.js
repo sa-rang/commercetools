@@ -27,7 +27,7 @@ const checkout = new CheckoutAPI(client);
 
 //------------------------------- recurring payment code---------------------------
 
-const SHOPPER_REFERENCE = "Rafael@aiops.com";
+const SHOPPER_REFERENCE = "sarang@gmail.com";
 var tokens = [];
 
 const getAll = () => {
