@@ -36,6 +36,7 @@ import useCartTools from 'hooks/useCartTools';
 import { useRoute, useRouter } from 'vue-router';
 import useMyOrderBasic from 'hooks/ct/useMyOrder';
 import useLocale from 'hooks/useLocale';
+import useCustomerTools from 'hooks/useCustomerTools';
 
 export default {
     components: {
@@ -49,6 +50,7 @@ export default {
         const orderTransMsg = shallowRef(null);
         const loadPaymentInterface = shallowRef(false);
         const getUserPayTokens = shallowRef(null);
+        const { customer } = useCustomerTools();
 
         const { locale } = useLocale();
         const { loading, order } = useMyOrderBasic({
@@ -116,6 +118,7 @@ export default {
                     amount: order.value?.totalPrice.centAmount,
                     currency: order.value?.totalPrice.currencyCode,
                     orderNumber: order.value?.orderNumber,
+                    customerRef: customer.value?.email || "",
                     recReference: iPayRef
                 }
 

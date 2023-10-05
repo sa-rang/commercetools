@@ -54,8 +54,6 @@ export default {
                 // no session: init checkout
                 await startCheckout();
             }
-
-            console.log("customerdata", customer.value)
         });
 
 

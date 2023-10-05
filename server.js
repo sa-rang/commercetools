@@ -91,7 +91,7 @@ app.post("/api/sessions", async (req, res) => {
             ],
             returnUrl: `${protocol}://${host}/api/handleShopperRedirect?orderRef=${orderRef}`, // Required `returnUrl` param: Set redirect URL required for some payment methods
             // recurring payment settings
-            shopperReference: SHOPPER_REFERENCE,
+            shopperReference: payload.customerRef,
             shopperInteraction: "Ecommerce",
             recurringProcessingModel: "Subscription",
             enableRecurring: true
@@ -117,7 +117,7 @@ app.post("/api/recpayment", async (req, res) => {
             shopperInteraction: "ContAuth", // Continuous Authorization
             recurringProcessingModel: "Subscription",
             merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-            shopperReference: SHOPPER_REFERENCE,
+            shopperReference: payload.customerRef,
             paymentMethod: {
                 storedPaymentMethodId: payload.recReference
             }
