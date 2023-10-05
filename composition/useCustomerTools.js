@@ -109,6 +109,26 @@ function useCustomerTools() {
         router.push({ name: 'user' });
         return result;
       });
+
+  const signupSocial = (form) =>
+    basic
+      .signupSocial(form)
+      .then((data) => {
+        // return loginToken(form.email, form.password).then(
+        //   () => data
+        // );
+        console.log("reg", data)
+      })
+      .then((result) => {
+        // saveCustomerState(
+        //   result.data.customerSignMeUp.customer
+        // );
+        //reset entire cache, customer may have specific prices
+        cache.reset();
+        router.push({ name: 'user' });
+        return result;
+      });
+
   const resetPassword = ({ token, newPassword }) =>
     basic.resetPassword({ token, newPassword }).then(() =>
       router.push({
@@ -127,6 +147,23 @@ function useCustomerTools() {
     li(email, password).then(() =>
       router.push({ name: 'user' })
     );
+
+  const socialLogin = (email) =>
+    basic
+      .socialLogin(email)
+      .then((data) => {
+        //return loginToken(email, password).then(() => data);
+        console.log("after social login", data)
+      })
+      .then((result) => {
+        // saveCustomerState(
+        //   result.data.customerSignMeIn.customer
+        // );
+        //reset entire cache, customer may have specific prices
+        cache.reset();
+        return result;
+      });
+
   const returnItems = (id, version, items) => {
     return basic
       .returnItems(id, version, items)
@@ -161,6 +198,11 @@ function useCustomerTools() {
       params: { token },
     });
   const { token } = route?.params || {};
+
+  const checkUserExist = (email) => {
+    return basic.checkUserExist(email)
+  }
+
   return {
     token,
     login,
@@ -177,6 +219,9 @@ function useCustomerTools() {
     gotoResetToken,
     refreshUser,
     updateMyCustomerPassword,
+    checkUserExist,
+    signupSocial,
+    socialLogin
   };
 }
 export default useCustomerTools;

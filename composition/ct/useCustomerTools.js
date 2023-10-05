@@ -102,9 +102,34 @@ const signup = (form) => {
     variables: {
       draft: {
         email: form.email,
-        password: form.password,
+        //password: form.password,
         firstName: form.firstName,
         lastName: form.lastName,
+        authenticationMode: "ExternalAuth"
+      },
+    },
+  });
+};
+
+const signupSocial = (form) => {
+  return apolloClient.mutate({
+    mutation: gql`
+      mutation customerSignUp(
+        $draft: CustomerSignUpDraft!
+      ) {
+        customerSignUp(draft: $draft) {
+          customer {
+            ${customerFields}
+          }
+        }
+      }
+    `,
+    variables: {
+      draft: {
+        email: form.email,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        authenticationMode: "ExternalAuth"
       },
     },
   });
@@ -151,6 +176,8 @@ const updateUser = ({
       ],
     },
   });
+
+
 const login = (email, password) =>
   apolloClient.mutate({
     mutation: gql`
@@ -166,6 +193,29 @@ const login = (email, password) =>
     `,
     variables: loginVars(email, password),
   });
+
+const socialLogin = (email) =>
+  apolloClient.mutate({
+    mutation: gql`
+      mutation customerSignIn(
+        $draft: CustomerSignInDraft!
+      ) {
+        customerSignIn(draft: $draft) {
+          customer {
+            ${customerFields}
+          }
+        }
+      }
+    `,
+    variables: {
+      draft: {
+        email,
+        password: ""
+      }
+    },
+  });
+
+
 const updateMyCustomerPassword = ({
   currentPassword,
   newPassword,
@@ -195,6 +245,23 @@ const updateMyCustomerPassword = ({
   });
 };
 
+const checkUserExist = (email) =>
+  apolloClient.query({
+    query: gql`
+      query queryCustomers($predicate: String){
+       customers(limit: 1, where: $predicate) {
+        results {
+          email,
+          }
+        }
+      }
+    `,
+    variables: {
+      predicate: `email = "${email}"`
+    },
+    fetchPolicy: 'network-only',
+  });
+
 export default {
   signup,
   updateUser,
@@ -206,4 +273,7 @@ export default {
   updateMyCustomerPassword,
   login,
   refreshUser,
+  checkUserExist,
+  signupSocial,
+  socialLogin
 };

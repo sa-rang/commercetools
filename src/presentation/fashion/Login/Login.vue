@@ -18,6 +18,7 @@
           <SignUpForm />
         </div>
       </div>
+      <GoogleSignIn />
     </div>
   </div>
 </template>
