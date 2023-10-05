@@ -13,6 +13,7 @@
 <script >
 import { ref, onMounted, computed } from 'vue';
 import useCurrency from 'hooks/useCurrency';
+import useCustomerTools from 'hooks/useCustomerTools';
 
 import '@adyen/adyen-web/dist/adyen.css';
 let AdyenCheckout;
@@ -38,6 +39,7 @@ export default {
         const payMethodData = ref(null);
         const cartAmount = computed(() => props.amount);
         const currency = useCurrency();
+        const { customer } = useCustomerTools();
 
 
         onMounted(async () => {
@@ -52,6 +54,8 @@ export default {
                 // no session: init checkout
                 await startCheckout();
             }
+
+            console.log("customerdata", customer.value)
         });
 
 
@@ -64,7 +68,8 @@ export default {
                     {
                         amount: cartAmount.value.centAmount,
                         currency: currency.value,
-                        orderNumber: props.ordernumber
+                        orderNumber: props.ordernumber,
+                        customerRef: customer.value?.email || ""
                     }
                 );
                 // Create AdyenCheckout using Sessions response
