@@ -18,6 +18,7 @@
           <SignUpForm />
         </div>
       </div>
+
     </div>
   </div>
 </template>
