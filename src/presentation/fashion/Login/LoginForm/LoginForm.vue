@@ -4,6 +4,7 @@
 <template>
   <div class="login-register-wrap">
     <h3>{{ t('signIn') }}</h3>
+
     <div class="login-register-form">
       <BaseForm :vuelidate="v" :onSubmit="customerSignMeIn" #default="{ error }">
         <div class="sin-login-register">
@@ -18,12 +19,15 @@
           <router-link :to="{ name: 'forgot-password' }" v-if="showResetPassword">{{ t('forgotPassword') }}</router-link>
         </div>
 
-        <div class="login-register-btn-remember">
-          <div class="login-register-btn">
+        <div class="login-register-btn-remember d-flex">
+          <div class="login-register-btn mr-3">
+
             <button data-test="login-form-submit">
               {{ t('signIn') }}
             </button>
           </div>
+          <GoogleSignIn />
+
         </div>
         <ServerError class="mb-20" :error="error" v-slot="{ graphQLError }">{{ getErrorMessage(graphQLError) }}
         </ServerError>

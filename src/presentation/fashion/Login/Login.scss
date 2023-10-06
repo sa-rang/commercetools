@@ -2,6 +2,7 @@
 .login-register-area {
   background-color: #fff;
 }
+
 .login-register-wrap {
   h3 {
     i {
@@ -19,7 +20,7 @@
   }
 
   .login-register-form {
-    margin: 47px 0 0;
+    margin: 10px 0 0;
 
     @media #{$xs-layout} {
       margin: 10px 0 0;
@@ -71,7 +72,7 @@
     }
 
     .lost-password {
-      > a {
+      >a {
         font-size: 14px;
         color: $theme-color;
 

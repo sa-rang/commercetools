@@ -17,6 +17,7 @@ import { CUSTOMER } from '../src/constants';
 import { createReactive } from './lib';
 import addVisibilityChangeListener from './lib';
 
+
 addVisibilityChangeListener(
   ((value) => (status) => {
     const currentValue = localStorage.getItem(CUSTOMER);
@@ -42,6 +43,7 @@ const saveCustomerState = (c) => {
   customerGlobal.setValue(c);
 };
 const createResetToken = basic.createResetToken;
+
 const refreshUser = () =>
   basic
     .refreshUser()
@@ -110,24 +112,26 @@ function useCustomerTools() {
         return result;
       });
 
-  const signupSocial = (form) =>
-    basic
-      .signupSocial(form)
+  const signupSocial = (form) => {
+    form.password = generatePassword(); //Random Password
+    return basic
+      .signup(form)
       .then((data) => {
-        // return loginToken(form.email, form.password).then(
-        //   () => data
-        // );
-        console.log("reg", data)
+        return loginToken(form.email, form.password).then(
+          () => data
+        );
       })
       .then((result) => {
-        // saveCustomerState(
-        //   result.data.customerSignMeUp.customer
-        // );
+        saveCustomerState(
+          result.data.customerSignMeUp.customer
+        );
         //reset entire cache, customer may have specific prices
         cache.reset();
         router.push({ name: 'user' });
         return result;
       });
+  }
+
 
   const resetPassword = ({ token, newPassword }) =>
     basic.resetPassword({ token, newPassword }).then(() =>
@@ -148,21 +152,21 @@ function useCustomerTools() {
       router.push({ name: 'user' })
     );
 
-  const socialLogin = (email) =>
-    basic
-      .socialLogin(email)
-      .then((data) => {
-        //return loginToken(email, password).then(() => data);
-        console.log("after social login", data)
+  const socialLogin = (email) => {
+    let RandomPass = generatePassword();
+    return basic
+      .createResetToken(email)
+      .then((token) => {
+
+        return resetPassword({
+          token: token.data.customerCreatePasswordResetToken
+            .value, newPassword: RandomPass
+        }).then(() => token);
       })
-      .then((result) => {
-        // saveCustomerState(
-        //   result.data.customerSignMeIn.customer
-        // );
-        //reset entire cache, customer may have specific prices
-        cache.reset();
-        return result;
+      .then(() => {
+        return login(email, RandomPass)
       });
+  }
 
   const returnItems = (id, version, items) => {
     return basic
@@ -202,6 +206,16 @@ function useCustomerTools() {
   const checkUserExist = (email) => {
     return basic.checkUserExist(email)
   }
+
+  const generatePassword = (
+    length = 10,
+    characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$'
+  ) =>
+    Array.from(crypto.getRandomValues(new Uint32Array(length)))
+      .map((x) => characters[x % characters.length])
+      .join('')
+
+
 
   return {
     token,

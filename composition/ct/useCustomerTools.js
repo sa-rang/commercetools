@@ -102,10 +102,9 @@ const signup = (form) => {
     variables: {
       draft: {
         email: form.email,
-        //password: form.password,
+        password: form.password,
         firstName: form.firstName,
         lastName: form.lastName,
-        authenticationMode: "ExternalAuth"
       },
     },
   });
