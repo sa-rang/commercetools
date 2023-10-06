@@ -6,7 +6,7 @@
 
                     <div v-if="getUserPayTokens && getUserPayTokens.length > 0" class="col-lg-6 offset-lg-3 ">
                         <div class="border p-3">
-                            <h3>Use saved payment method</h3>
+                            <h3>Use saved authorization</h3>
                             <div v-for="(eachToken, index) in getUserPayTokens" :key="index">
                                 <p>User Ref: {{ eachToken.shopperReference }}</p>
                                 <p>Payment method: {{ eachToken.paymentMethod }}</p>
