@@ -6,6 +6,7 @@ import router from './router';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
 import i18n from './i18n';
 import 'presentation/assets/scss/main.scss';
+import vue3GoogleLogin from 'vue3-google-login'
 
 const app = createApp({
   setup() {
@@ -14,6 +15,9 @@ const app = createApp({
 
   render: () => h(App),
 })
+  .use(vue3GoogleLogin, {
+    clientId: process.env.VUE_APP_GOOGLE_AUTH_CLIENT_ID
+  })
   .use(VueGoogleMaps, {
     load: {
       key: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
@@ -21,6 +25,7 @@ const app = createApp({
     },
   })
   .use(i18n)
-  .use(router);
+  .use(router)
+
 
 app.mount('#app');

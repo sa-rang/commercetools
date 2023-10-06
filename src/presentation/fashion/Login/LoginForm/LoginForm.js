@@ -9,6 +9,7 @@ import translation from './LoginForm.json'
 import useCustomerTools from 'hooks/useCustomerTools';
 import { ref } from 'vue';
 import useAccessRules from 'hooks/useAccessRules';
+import GoogleSignIn from "../SocialLogin/GoogleSignIn.vue"
 function Rules() {
   this.password = { required };
   this.email = {
@@ -22,6 +23,7 @@ export default {
     BaseForm,
     BaseInput,
     ServerError,
+    GoogleSignIn
     // LoadingButton,
   },
   props: {},

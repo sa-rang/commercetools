@@ -10,7 +10,7 @@
       t('myOrders') }}</router-link>
     <router-link :class="activeTab === 'changepassword' ? 'active' : ''
       " :to="{ name: 'changepassword' }" data-test="change-password-button">{{ t('changePassword') }}</router-link>
-    <a href="#" @click.prevent="logout" data-test="sign-out">
+    <a href="#" @click.prevent="signOut" data-test="sign-out">
       {{ t('signOut') }}
     </a>
   </div>
