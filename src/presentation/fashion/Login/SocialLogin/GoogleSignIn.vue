@@ -30,8 +30,8 @@ export default {
                     } else {
                         //register user & login
                         let regData = {
-                            firstName: userData.name,
-                            lastName: "",
+                            firstName: userData.given_name,
+                            lastName: userData.family_name ? userData.family_name : "",
                             email: userData.email,
                             agreeToTerms: true,
                         }
