@@ -10,6 +10,7 @@ import useCustomerTools from 'hooks/useCustomerTools';
 import { ref } from 'vue';
 import useAccessRules from 'hooks/useAccessRules';
 import GoogleSignIn from "../SocialLogin/GoogleSignIn.vue"
+import FacebookSignIn from "../SocialLogin/FacebookSignIn.vue"
 function Rules() {
   this.password = { required };
   this.email = {
@@ -23,7 +24,8 @@ export default {
     BaseForm,
     BaseInput,
     ServerError,
-    GoogleSignIn
+    GoogleSignIn,
+    FacebookSignIn
     // LoadingButton,
   },
   props: {},

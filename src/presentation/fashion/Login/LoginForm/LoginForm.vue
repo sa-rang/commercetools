@@ -27,6 +27,7 @@
             </button>
           </div>
           <GoogleSignIn />
+          <FacebookSignIn />
 
         </div>
         <ServerError class="mb-20" :error="error" v-slot="{ graphQLError }">{{ getErrorMessage(graphQLError) }}
