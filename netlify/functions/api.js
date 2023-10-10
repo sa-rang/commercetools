@@ -162,7 +162,7 @@ router.post('/webhooks/notifications', async (req, res) => {
         }
 
         // Process the notification asynchronously based on the eventCode
-        consumeEvent(notification);
+        await consumeEvent(notification);
         res.send('[accepted]');
     } catch (err) {
         console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
@@ -202,6 +202,11 @@ const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperRef
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
     console.log("url", Auth_URL);
+    return axios.get(`https://jsonplaceholder.typicode.com/todos/1`).then((res) => {
+        console.log(res)
+    })
+
+
     const response = await axios.post(
         Auth_URL,
         'grant_type=client_credentials',
