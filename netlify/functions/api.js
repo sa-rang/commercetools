@@ -35,7 +35,7 @@ const router = Router();
 router.get('/hello', (req, res) => res.send('Hello World!'));
 //router.get('/getUserToken', (req, res) => res.json(getAll()));
 app.get('/saveToken', async (req, res) => {
-    await saveTokenInCT("REF_Aiops", "VISA", "general4sarang@gmail.com")
+    await saveTokenInCT("REF_Aiops123", "VISA", "general4sarang@gmail.com")
     res.send('Token Saved')
 
 });
@@ -186,7 +186,7 @@ const consumeEvent = async (notification) => {
             " paymentMethod:" + paymentMethod);
 
         // save token
-        saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
+        await saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
 
     } else if (notification.eventCode == "AUTHORISATION") {
         // webhook with payment authorisation
@@ -198,6 +198,7 @@ const consumeEvent = async (notification) => {
 
 
 const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperReference) => {
+    console.log("saveTokenInCT called");
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
     const response = await axios.post(
@@ -213,6 +214,7 @@ const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperRef
             }
         }
     );
+    console.log(response?.data);
 
     // if access token found get the Customer details by email
     if (response?.data) {
