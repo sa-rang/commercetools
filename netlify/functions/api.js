@@ -200,7 +200,7 @@ const consumeEvent = async (notification) => {
 
 
 const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference) => {
-    console.log("saveTokenInCT called", response?.data)
+    console.log("saveTokenInCT called")
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
     return axios.post(
