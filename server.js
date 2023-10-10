@@ -172,7 +172,7 @@ app.post("/api/webhooks/notifications", async (req, res) => {
         }
 
         // Process the notification asynchronously based on the eventCode
-        consumeEvent(notification);
+        await consumeEvent(notification);
         res.send('[accepted]');
     } catch (err) {
         console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
@@ -183,7 +183,6 @@ app.post("/api/webhooks/notifications", async (req, res) => {
 
 const consumeEvent = async (notification) => {
     // valid hmac: process event
-
     const shopperReference = notification.additionalData['recurring.shopperReference'];
 
     // read about eventcode "RECURRING_CONTRACT" here: https://docs.adyen.com/online-payments/tokenization/create-and-use-tokens?tab=subscriptions_2#pending-and-refusal-result-codes-1
@@ -196,7 +195,7 @@ const consumeEvent = async (notification) => {
             " paymentMethod:" + paymentMethod);
 
         // save token
-        saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
+        return saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
 
     } else if (notification.eventCode == "AUTHORISATION") {
         // webhook with payment authorisation
@@ -208,7 +207,7 @@ const consumeEvent = async (notification) => {
 
 
 const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference) => {
-
+    console.log("saveToken Webhook called")
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
     return axios.post(
@@ -224,14 +223,13 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
             }
         }
     ).then((response) => {
-        // if access token found get the Customer details by email
+        // if access token found 
         if (response?.data) {
             let Auth_Token = `Bearer ${response.data.access_token}`
             let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
 
-
+            //get the Customer details by email
             let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
-
             return axios.get(`${CT_API_URL}/customers?${query}`, {
                 headers: {
                     'Authorization': Auth_Token
@@ -239,29 +237,24 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
             }).then((customerData) => {
                 if (customerData?.data?.results && customerData?.data?.results.length > 0) {
                     let cust = customerData?.data?.results[0];
-                    console.log(cust)
-
                     // set psp ref in pspAuthorizationCode [custom field] of the custome data
-                    let actions = [
-                        {
-                            "action": "setCustomType",
-                            "type": {
-                                "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
-                                "typeId": "type"
-                            }
-                        },
-                        {
-                            "action": "setCustomField",
-                            "name": "pspAuthorizationCode",
-                            "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
-                        }
-
-                    ]
-
                     return axios.post(`${CT_API_URL}/customers/${cust.id}`,
                         {
                             "version": cust.version,
-                            "actions": actions
+                            "actions": [
+                                {
+                                    "action": "setCustomType",
+                                    "type": {
+                                        "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
+                                        "typeId": "type"
+                                    }
+                                },
+                                {
+                                    "action": "setCustomField",
+                                    "name": "pspAuthorizationCode",
+                                    "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+                                }
+                            ]
                         },
                         {
                             headers: {
@@ -272,20 +265,14 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
                     ).then((result) => {
                         console.log(result.data);
                     });
-
                 }
-
             });
-
-
-
         }
     });
 
 
 
 }
-
 
 /* ################# end WEBHOOK ###################### */
 

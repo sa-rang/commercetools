@@ -50,7 +50,7 @@ export default {
         const orderTransMsg = shallowRef(null);
         const loadPaymentInterface = shallowRef(false);
         const getUserPayTokens = shallowRef(null);
-        const { customer } = useCustomerTools();
+        const { customer, refreshUser } = useCustomerTools();
 
         const { locale } = useLocale();
         const { loading, order } = useMyOrderBasic({
@@ -61,9 +61,9 @@ export default {
             if (iOrder?.paymentState == "Paid") {
                 gotoThankYou(iOrder?.orderNumber)
             } else {
+                await refreshUser()
                 getUserPayTokens.value = await getUserPaymentTokens()
                 loadPaymentInterface.value = true
-
             }
         });
         onMounted(async () => {
