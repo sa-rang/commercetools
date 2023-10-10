@@ -63,6 +63,7 @@ export default {
             } else {
                 getUserPayTokens.value = await getUserPaymentTokens()
                 loadPaymentInterface.value = true
+
             }
         });
         onMounted(async () => {
@@ -99,9 +100,22 @@ export default {
 
         const getUserPaymentTokens = async () => {
             try {
-                const url = "/api/getUserToken"
-                const res = await fetch(url);
-                return await res.json();
+                let tokens = [];
+                if (customer.value?.custom?.customFieldsRaw && customer.value?.custom?.customFieldsRaw.length > 0) {
+                    let rawFields = customer.value?.custom?.customFieldsRaw;
+                    let PayRef = rawFields.find(o => o.name === 'pspAuthorizationCode');
+                    if (PayRef) {
+                        let splitValue = PayRef.value.split("**");
+                        if (splitValue && splitValue.length == 3) {
+                            tokens.push({
+                                shopperReference: splitValue[2],
+                                paymentMethod: splitValue[1],
+                                recurringDetailReference: splitValue[0]
+                            })
+                        }
+                    }
+                }
+                return tokens;
             } catch (error) {
                 console.error(error);
                 alert("Error occurred. Look at console for details");
