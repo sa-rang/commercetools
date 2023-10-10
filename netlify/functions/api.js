@@ -162,7 +162,7 @@ router.post('/webhooks/notifications', async (req, res) => {
         }
 
         // Process the notification asynchronously based on the eventCode
-        await consumeEvent(notification);
+        consumeEvent(notification);
         res.send('[accepted]');
     } catch (err) {
         console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
@@ -171,7 +171,8 @@ router.post('/webhooks/notifications', async (req, res) => {
 });
 
 
-const consumeEvent = async (notification) => {
+
+const consumeEvent = (notification) => {
     // valid hmac: process event
 
     const shopperReference = notification.additionalData['recurring.shopperReference'];
@@ -186,7 +187,7 @@ const consumeEvent = async (notification) => {
             " paymentMethod:" + paymentMethod);
 
         // save token
-        await saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
+        saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
 
     } else if (notification.eventCode == "AUTHORISATION") {
         // webhook with payment authorisation
@@ -197,17 +198,11 @@ const consumeEvent = async (notification) => {
 }
 
 
-const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperReference) => {
-    console.log("saveTokenInCT called");
+const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference) => {
+
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
-    console.log("url", Auth_URL);
-    return axios.get(`https://jsonplaceholder.typicode.com/todos/1`).then((res) => {
-        console.log(res)
-    })
-
-
-    const response = await axios.post(
+    return axios.post(
         Auth_URL,
         'grant_type=client_credentials',
         {
@@ -219,59 +214,69 @@ const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperRef
                 password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
             }
         }
-    );
-    console.log(response?.data);
-
-    // if access token found get the Customer details by email
-    if (response?.data) {
-        let Auth_Token = `Bearer ${response.data.access_token}`
-        let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
-        let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
-
-        const customerData = await axios.get(`${CT_API_URL}/customers?${query}`, {
-            headers: {
-                'Authorization': Auth_Token
-            }
-        });
+    ).then((response) => {
+        // if access token found get the Customer details by email
+        if (response?.data) {
+            let Auth_Token = `Bearer ${response.data.access_token}`
+            let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
 
 
-        if (customerData?.data?.results && customerData?.data?.results.length > 0) {
-            let cust = customerData?.data?.results[0];
-            // set psp ref in pspAuthorizationCode [custom field] of the custome data
-            let actions = [
-                {
-                    "action": "setCustomType",
-                    "type": {
-                        "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
-                        "typeId": "type"
-                    }
-                },
-                {
-                    "action": "setCustomField",
-                    "name": "pspAuthorizationCode",
-                    "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+            let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
+
+            return axios.get(`${CT_API_URL}/customers?${query}`, {
+                headers: {
+                    'Authorization': Auth_Token
+                }
+            }).then((customerData) => {
+                if (customerData?.data?.results && customerData?.data?.results.length > 0) {
+                    let cust = customerData?.data?.results[0];
+                    console.log(cust)
+
+                    // set psp ref in pspAuthorizationCode [custom field] of the custome data
+                    let actions = [
+                        {
+                            "action": "setCustomType",
+                            "type": {
+                                "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
+                                "typeId": "type"
+                            }
+                        },
+                        {
+                            "action": "setCustomField",
+                            "name": "pspAuthorizationCode",
+                            "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+                        }
+
+                    ]
+
+                    return axios.post(`${CT_API_URL}/customers/${cust.id}`,
+                        {
+                            "version": cust.version,
+                            "actions": actions
+                        },
+                        {
+                            headers: {
+                                'Authorization': Auth_Token,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    ).then((result) => {
+                        console.log(result.data);
+                    });
+
                 }
 
-            ]
+            });
 
-            const result = await axios.post(`${CT_API_URL}/customers/${cust.id}`,
-                {
-                    "version": cust.version,
-                    "actions": actions
-                },
-                {
-                    headers: {
-                        'Authorization': Auth_Token,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            console.log(result.data);
+
+
         }
+    });
 
-    }
+
 
 }
+
 
 app.use('/api/', router);
 

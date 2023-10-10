@@ -43,7 +43,7 @@ app.get('/api/hello', (req, res) => res.send('Hello World!'));
 //app.get('/api/getUserToken', (req, res) => res.json(getAll()));
 app.get('/api/saveToken', async (req, res) => {
 
-    await saveTokenInCT("REF", "VISA", "general4sarang@gmail.com")
+    await saveTokenInCT("REFAiopsxxx", "VISA", "general4sarang@gmail.com")
     res.send('Hello World!')
 
 });
@@ -207,11 +207,11 @@ const consumeEvent = async (notification) => {
 }
 
 
-const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperReference) => {
+const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference) => {
 
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
-    const response = await axios.post(
+    return axios.post(
         Auth_URL,
         'grant_type=client_credentials',
         {
@@ -223,59 +223,66 @@ const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperRef
                 password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
             }
         }
-    );
-
-    // if access token found get the Customer details by email
-    if (response?.data) {
-        let Auth_Token = `Bearer ${response.data.access_token}`
-        let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
-
-
-        let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
-        const customerData = await axios.get(`${CT_API_URL}/customers?${query}`, {
-            headers: {
-                'Authorization': Auth_Token
-            }
-        });
+    ).then((response) => {
+        // if access token found get the Customer details by email
+        if (response?.data) {
+            let Auth_Token = `Bearer ${response.data.access_token}`
+            let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
 
 
-        if (customerData?.data?.results && customerData?.data?.results.length > 0) {
-            let cust = customerData?.data?.results[0];
-            console.log(cust)
+            let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
 
-            // set psp ref in pspAuthorizationCode [custom field] of the custome data
-            let actions = [
-                {
-                    "action": "setCustomType",
-                    "type": {
-                        "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
-                        "typeId": "type"
-                    }
-                },
-                {
-                    "action": "setCustomField",
-                    "name": "pspAuthorizationCode",
-                    "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+            return axios.get(`${CT_API_URL}/customers?${query}`, {
+                headers: {
+                    'Authorization': Auth_Token
+                }
+            }).then((customerData) => {
+                if (customerData?.data?.results && customerData?.data?.results.length > 0) {
+                    let cust = customerData?.data?.results[0];
+                    console.log(cust)
+
+                    // set psp ref in pspAuthorizationCode [custom field] of the custome data
+                    let actions = [
+                        {
+                            "action": "setCustomType",
+                            "type": {
+                                "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
+                                "typeId": "type"
+                            }
+                        },
+                        {
+                            "action": "setCustomField",
+                            "name": "pspAuthorizationCode",
+                            "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+                        }
+
+                    ]
+
+                    return axios.post(`${CT_API_URL}/customers/${cust.id}`,
+                        {
+                            "version": cust.version,
+                            "actions": actions
+                        },
+                        {
+                            headers: {
+                                'Authorization': Auth_Token,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    ).then((result) => {
+                        console.log(result.data);
+                    });
+
                 }
 
-            ]
+            });
 
-            const result = await axios.post(`${CT_API_URL}/customers/${cust.id}`,
-                {
-                    "version": cust.version,
-                    "actions": actions
-                },
-                {
-                    headers: {
-                        'Authorization': Auth_Token,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            console.log(result.data);
+
+
         }
+    });
 
-    }
+
 
 }
 
