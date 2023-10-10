@@ -201,6 +201,7 @@ const saveTokenInCT = async (recurringDetailReference, paymentMethod, shopperRef
     console.log("saveTokenInCT called");
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
+    console.log("url", Auth_URL);
     const response = await axios.post(
         Auth_URL,
         'grant_type=client_credentials',
