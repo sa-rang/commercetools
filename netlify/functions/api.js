@@ -35,6 +35,7 @@ const router = Router();
 router.get('/hello', (req, res) => res.send('Hello World!'));
 //router.get('/getUserToken', (req, res) => res.json(getAll()));
 router.get('/saveToken', async (req, res) => {
+
     await saveTokenInCT("REF_Netify", "VISA", "general4sarang@gmail.com")
     res.send('Token Saved')
 
@@ -162,7 +163,7 @@ router.post('/webhooks/notifications', async (req, res) => {
         }
 
         // Process the notification asynchronously based on the eventCode
-        consumeEvent(notification);
+        await consumeEvent(notification);
         res.send('[accepted]');
     } catch (err) {
         console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
@@ -172,7 +173,7 @@ router.post('/webhooks/notifications', async (req, res) => {
 
 
 
-const consumeEvent = (notification) => {
+const consumeEvent = async (notification) => {
     // valid hmac: process event
 
     const shopperReference = notification.additionalData['recurring.shopperReference'];
@@ -187,7 +188,7 @@ const consumeEvent = (notification) => {
             " paymentMethod:" + paymentMethod);
 
         // save token
-        saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
+        return saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
 
     } else if (notification.eventCode == "AUTHORISATION") {
         // webhook with payment authorisation
@@ -199,87 +200,83 @@ const consumeEvent = (notification) => {
 
 
 const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference) => {
-    console.log("saveTokenInCT called")
+    console.log("saveTokenInCT called", response?.data)
     // get access token
     const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
+    return axios.post(
+        Auth_URL,
+        'grant_type=client_credentials',
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            auth: {
+                username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
+                password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
+            }
+        }
+    ).then((response) => {
+        console.log("first called", response?.data)
+        // if access token found get the Customer details by email
+        if (response?.data) {
+            let Auth_Token = `Bearer ${response.data.access_token}`
+            let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
 
-    return axios.get(`https://jsonplaceholder.typicode.com/todos/1`).then((jsonData) => {
-        console.log(jsonData?.data)
-        return
-    }).then(() => {
 
-
-        return axios.post(
-            Auth_URL,
-            'grant_type=client_credentials',
-            {
+            let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
+            console.log("customerdata start")
+            return axios.get(`${CT_API_URL}/customers?${query}`, {
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                auth: {
-                    username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
-                    password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
+                    'Authorization': Auth_Token
                 }
-            }
-        ).then((response) => {
-            console.log("first called", response?.data)
-            // if access token found get the Customer details by email
-            if (response?.data) {
-                let Auth_Token = `Bearer ${response.data.access_token}`
-                let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
+            }).then((customerData) => {
+                console.log("customerdata called", customerData?.data)
+                if (customerData?.data?.results && customerData?.data?.results.length > 0) {
+                    let cust = customerData?.data?.results[0];
+                    console.log(cust)
+
+                    // set psp ref in pspAuthorizationCode [custom field] of the custome data
+                    let actions = [
+                        {
+                            "action": "setCustomType",
+                            "type": {
+                                "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
+                                "typeId": "type"
+                            }
+                        },
+                        {
+                            "action": "setCustomField",
+                            "name": "pspAuthorizationCode",
+                            "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+                        }
+
+                    ]
+
+                    return axios.post(`${CT_API_URL}/customers/${cust.id}`,
+                        {
+                            "version": cust.version,
+                            "actions": actions
+                        },
+                        {
+                            headers: {
+                                'Authorization': Auth_Token,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    ).then((result) => {
+                        console.log(result.data);
+                    });
+
+                }
+
+            });
 
 
-                // let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
 
-                // return axios.get(`${CT_API_URL}/customers?${query}`, {
-                //     headers: {
-                //         'Authorization': Auth_Token
-                //     }
-                // }).then((customerData) => {
-                //     if (customerData?.data?.results && customerData?.data?.results.length > 0) {
-                //         let cust = customerData?.data?.results[0];
-                //         console.log(cust)
-
-                //         // set psp ref in pspAuthorizationCode [custom field] of the custome data
-                //         let actions = [
-                //             {
-                //                 "action": "setCustomType",
-                //                 "type": {
-                //                     "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
-                //                     "typeId": "type"
-                //                 }
-                //             },
-                //             {
-                //                 "action": "setCustomField",
-                //                 "name": "pspAuthorizationCode",
-                //                 "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
-                //             }
-
-                //         ]
-
-                //         return axios.post(`${CT_API_URL}/customers/${cust.id}`,
-                //             {
-                //                 "version": cust.version,
-                //                 "actions": actions
-                //             },
-                //             {
-                //                 headers: {
-                //                     'Authorization': Auth_Token,
-                //                     'Content-Type': 'application/json'
-                //                 }
-                //             }
-                //         ).then((result) => {
-                //             console.log(result.data);
-                //         });
-
-                //     }
-
-                // });
-
-            }
-        });
-
+        }
     });
+
+
 
 }
 
