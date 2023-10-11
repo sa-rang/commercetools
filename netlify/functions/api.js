@@ -3,6 +3,8 @@ import serverless from 'serverless-http';
 const dotenv = require("dotenv");
 //const { uuid } = require("uuidv4");
 const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-library");
+const axios = require('axios');
+var qs = require('querystringify');
 
 const app = express();
 
@@ -25,34 +27,19 @@ const checkout = new CheckoutAPI(client);
 
 
 
-//------------------------------- recurring payment code---------------------------
-
-const SHOPPER_REFERENCE = "sarang@gmail.com";
-var tokens = [];
-
-const getAll = () => {
-    return tokens
-}
-
-const put = (pToken, pPaymentMethod, pShopperReference) => {
-    tokens.push({ recurringDetailReference: pToken, paymentMethod: pPaymentMethod, shopperReference: pShopperReference })
-    console.log("UserToken", tokens)
-}
-
-const remove = (pToken) => {
-    let indexToRemove = tokens.findIndex(obj => obj.recurringDetailReference === pToken);
-    tokens.splice(indexToRemove, 1)[0];
-}
-
-//------------------------------------------------------------------------------------------
-
 
 /* ################# API ENDPOINTS ###################### */
 
 const router = Router();
 
 router.get('/hello', (req, res) => res.send('Hello World!'));
-router.get('/getUserToken', (req, res) => res.json(getAll()));
+//router.get('/getUserToken', (req, res) => res.json(getAll()));
+router.get('/saveToken', async (req, res) => {
+
+    await saveTokenInCT("REF_Netify", "VISA", "general4sarang@gmail.com")
+    res.send('Token Saved')
+
+});
 
 router.post('/sessions', async (req, res) => {
     try {
@@ -156,44 +143,38 @@ router.all('/handleShopperRedirect', async (req, res) => {
 
 /* ################# WEBHOOK ###################### */
 router.post('/webhooks/notifications', async (req, res) => {
+    try {
+        // YOUR_HMAC_KEY from the Customer Area
+        const hmacKey = process.env.ADYEN_HMAC_KEY;
+        const validator = new hmacValidator()
 
-    // YOUR_HMAC_KEY from the Customer Area
-    const hmacKey = process.env.ADYEN_HMAC_KEY;
-    const validator = new hmacValidator()
+        // NotificationRequest JSON
+        const notificationRequest = req.body;
 
-    // NotificationRequest JSON
-    const notificationRequest = req.body;
+        // Fetch first (and only) NotificationRequestItem
+        const notification = notificationRequest.notificationItems[0].NotificationRequestItem;
 
-    // Fetch first (and only) NotificationRequestItem
-    const notification = notificationRequest.notificationItems[0].NotificationRequestItem;
+        // Handle the notification
+        if (!validator.validateHMAC(notification, hmacKey)) {
+            // invalid hmac: do not send [accepted] response
+            console.log("Invalid HMAC signature: " + notification);
+            res.status(401).send('Invalid HMAC signature');
+            return;
+        }
 
-    // Handle the notification
-    if (!validator.validateHMAC(notification, hmacKey)) {
-        // invalid hmac: do not send [accepted] response
-        console.log("Invalid HMAC signature: " + notification);
-        res.status(401).send('Invalid HMAC signature');
-        return;
+        // Process the notification asynchronously based on the eventCode
+        await consumeEvent(notification);
+        res.send('[accepted]');
+    } catch (err) {
+        console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
+        res.status(err.statusCode).json(err.message);
     }
-
-    // Process the notification asynchronously based on the eventCode
-    consumeEvent(notification);
-    res.send('[accepted]');
 });
 
-// Process payload
-// function consumeEvent(notification) {
-//     // Add item to DB, queue or different thread, we just log it for now
-//     const merchantReference = notification.merchantReference;
-//     const eventCode = notification.eventCode;
-//     console.log('merchantReference:' + merchantReference + " eventCode:" + eventCode);
-// }
 
 
-
-
-function consumeEvent(notification) {
+const consumeEvent = async (notification) => {
     // valid hmac: process event
-
     const shopperReference = notification.additionalData['recurring.shopperReference'];
 
     // read about eventcode "RECURRING_CONTRACT" here: https://docs.adyen.com/online-payments/tokenization/create-and-use-tokens?tab=subscriptions_2#pending-and-refusal-result-codes-1
@@ -206,7 +187,7 @@ function consumeEvent(notification) {
             " paymentMethod:" + paymentMethod);
 
         // save token
-        put(recurringDetailReference, paymentMethod, shopperReference)
+        return saveTokenInCT(recurringDetailReference, paymentMethod, shopperReference)
 
     } else if (notification.eventCode == "AUTHORISATION") {
         // webhook with payment authorisation
@@ -215,6 +196,76 @@ function consumeEvent(notification) {
         console.log("Unexpected eventCode: " + notification.eventCode);
     }
 }
+
+
+const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference) => {
+    console.log("saveToken Webhook called")
+    // get access token
+    const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
+    return axios.post(
+        Auth_URL,
+        'grant_type=client_credentials',
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            auth: {
+                username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
+                password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
+            }
+        }
+    ).then((response) => {
+        // if access token found 
+        if (response?.data) {
+            let Auth_Token = `Bearer ${response.data.access_token}`
+            let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
+
+            //get the Customer details by email
+            let query = qs.stringify({ where: `email=\"${shopperReference}\"` });
+            return axios.get(`${CT_API_URL}/customers?${query}`, {
+                headers: {
+                    'Authorization': Auth_Token
+                }
+            }).then((customerData) => {
+                if (customerData?.data?.results && customerData?.data?.results.length > 0) {
+                    let cust = customerData?.data?.results[0];
+                    // set psp ref in pspAuthorizationCode [custom field] of the custome data
+                    return axios.post(`${CT_API_URL}/customers/${cust.id}`,
+                        {
+                            "version": cust.version,
+                            "actions": [
+                                {
+                                    "action": "setCustomType",
+                                    "type": {
+                                        "id": `${process.env.VUE_APP_CT_PSPAUTH_FIELD_ID}`,
+                                        "typeId": "type"
+                                    }
+                                },
+                                {
+                                    "action": "setCustomField",
+                                    "name": "pspAuthorizationCode",
+                                    "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
+                                }
+                            ]
+                        },
+                        {
+                            headers: {
+                                'Authorization': Auth_Token,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    ).then((result) => {
+                        console.log(result.data);
+                    });
+                }
+            });
+        }
+    });
+
+
+
+}
+
 
 app.use('/api/', router);
 
