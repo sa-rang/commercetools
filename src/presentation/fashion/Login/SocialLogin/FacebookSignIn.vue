@@ -4,7 +4,7 @@
     <div class="py-3 my-3">
         <button class="btn-facebook" @click.prevent="fbLogin">
             <i class="lab la-facebook"></i>
-            <span>Facebook</span>
+            <span>Login with Facebook</span>
         </button>
     </div>
 </template>
@@ -34,23 +34,22 @@ export default {
                     console.log(response)
                     if (response.status === 'connected') {
                         // // Logged in through FB
-                        window.FB.api('/me?fields=id,name,email,first_name,last_name', (res) => {
-                            console.log('Successful login for: ' + res.name);
+                        window.FB.api('/me?fields=id,name,email,first_name,last_name', (FBres) => {
+                            console.log('Successful login for: ' + FBres.name);
 
                             // //check if customer already exist
-                            tools.checkUserExist(res.email).then((res) => {
-                                if (res?.data?.customers?.results && res?.data?.customers?.results.length == 1) {
+                            tools.checkUserExist(FBres.email).then((custRes) => {
+                                if (custRes?.data?.customers?.results && custRes?.data?.customers?.results.length == 1) {
                                     //customer found
-                                    console.log("customer exists", res.email)
+                                    console.log("customer exists", FBres.email)
                                     //directly login
-                                    tools.socialLogin(res.email)
-
+                                    tools.socialLogin(FBres.email)
                                 } else {
                                     //register user & login
                                     let regData = {
-                                        firstName: res.first_name,
-                                        lastName: res.last_name ? res.last_name : "",
-                                        email: res.email,
+                                        firstName: FBres.first_name,
+                                        lastName: FBres.last_name ? FBres.last_name : "",
+                                        email: FBres.email,
                                         agreeToTerms: true,
                                     }
                                     tools.signupSocial(regData)
@@ -58,38 +57,16 @@ export default {
                             })
                         });
 
-                        /* make the API call */
-                        // window.FB.api(`/${response.authResponse.userID}/`,
-                        //     function (user) {
-                        //         if (user && !user.error) {
-                        //             /* handle the result */
-                        //             console.log('user: ' + user);
-                        //         }
-                        //     }
-                        // );
-
-                        // window.FB.api('/me/permissions', (res) => {
-                        //     console.log('Permissions: ' + res.data);
-                        // });
-
-
-
                     } else {
-
                         // The person is not logged in through FB. 
                         console.log(response)
-
                     }
-
                 }, { scope: "public_profile,email" });
 
             } catch (error) {
                 console.log(error)
             }
-
         }
-
-
         return { fbLogin }
     }
 };
