@@ -73,6 +73,7 @@ export default {
     const modifyOrder = (iOderId, iOderVersion) => {
       return Promise.resolve()
         .then(() => {
+          if (order.value.orderState == 'Cancelled') return
           return cartTools.setOrderStatusCancelled({ orderId: iOderId, orderVersion: iOderVersion })
         })
         .then(() => {

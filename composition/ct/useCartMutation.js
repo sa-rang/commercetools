@@ -374,7 +374,7 @@ export const addOrderNumberUpdateOrder = ({ orderId, orderNumber, version }) => 
 export const updateOrderStatus = ({ orderId, version, CTorderStatus }) => {
   return apolloClient.mutate({
     mutation: gql`
-          mutation addPaymentOnOrder(
+          mutation updateOrderStatus(
             $orderId: String
             $version: Long!
             $actions:[OrderUpdateAction!]!

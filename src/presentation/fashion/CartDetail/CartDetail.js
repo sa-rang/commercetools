@@ -21,13 +21,9 @@ export default {
     const { t } = useI18n({
       messages: translations
     });
-    const { cart, loading, error, exist, loadCart } = useCart();
+    const { cart, loading, error, exist, refreshCart } = useCart();
     onMounted(() => {
-      console.log("cart-exist", exist.value)
-      if (!exist.value) {
-        console.log("cartdetails: load cart")
-        loadCart()
-      }
+      refreshCart()
     });
 
     return {

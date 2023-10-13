@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 import useQueryFacade from '../useQueryFacade';
 import { useState, useEffect } from 'react';
 import { getValue } from '../../src/lib';
+import { apolloClient } from '../../src/apollo';
 
 //@todo: we will worry about importing the partials
 //  when the cart route is done
@@ -123,29 +124,27 @@ const query = gql`
 const useCart = ({ locale }) => {
   const [cart, setCart] = useState();
   const [exist, setExist] = useState();
-  // const { loading, error } = useQueryFacade(query, {
-  //   variables: { locale },
-  //   onCompleted: (data) => {
-  //     if (!data) {
-  //       return;
-  //     }
-  //     setCart(data.myCart.activeCart);
-  //   },
-  // });
-  const loadCart = () => {
-    console.log("loadCart called")
-    return useQueryFacade(query, {
-      variables: { locale },
-      onCompleted: (data) => {
-        if (!data) {
-          return;
-        }
-        console.log("loadCart setCart reached")
-        setCart(data.myCart.activeCart);
-      },
+  const { loading, error } = useQueryFacade(query, {
+    variables: { locale },
+    onCompleted: (data) => {
+      if (!data) {
+        return;
+      }
+      setCart(data.myCart.activeCart);
+    },
+  });
+
+  const refreshCart = () =>
+    apolloClient.query({
+      variables: { locale: locale.value },
+      fetchPolicy: 'network-only',
+      query: query,
+    }).then((res) => {
+      if (!res?.data?.myCart?.activeCart) {
+        return;
+      }
+      setCart(res?.data?.myCart?.activeCart);
     });
-  }
-  const { loading, error } = loadCart()
 
   useEffect(
     () =>
@@ -156,7 +155,7 @@ const useCart = ({ locale }) => {
       ),
     [cart, loading, error]
   );
-  return { cart, exist, loading, error, loadCart };
+  return { cart, exist, loading, error, refreshCart };
 };
 
 

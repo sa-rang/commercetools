@@ -118,31 +118,37 @@
           </span>
         </div>
       </div>
-    </div>
-    <div class="pt-50 pb-55" v-if="!loading && !order">
-      <h1 class="text-center">{{ t('notFound') }}</h1>
-    </div>
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            Modification in order will cancel the current order. Are you sure you want to modify?
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" data-dismiss="modal"
-              @click="modifyOrder(order.id, order.version)">Modify Order</button>
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <span v-if="order.orderState == 'Cancelled'">
+                Are you sure you want to modify?
+              </span>
+              <span v-else>
+                Modification in order will cancel the current order. Are you sure you want to modify?
+              </span>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal"
+                @click="modifyOrder(order.id, order.version)">Modify Order</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <div class="pt-50 pb-55" v-if="!loading && !order">
+      <h1 class="text-center">{{ t('notFound') }}</h1>
+    </div>
+
   </div>
 </template>
