@@ -89,13 +89,30 @@ export default {
             }).catch((error) => console.warn('error:', error));
         }
 
-        const gotoThankYou = (orderNumber) => {
+        const gotoThankYou = async (orderNumber) => {
+            //send order comfirm mail here
+            await sendMail(orderNumber);
             router.push({
                 name: 'thankyou',
                 query: {
                     id: orderNumber
                 }
             });
+        }
+
+        const sendMail = async (orderNumber) => {
+            let mailData = {
+                type: "OrderPlace",
+                orderNumber: orderNumber
+            }
+            const res = await fetch("/api/sendmail", {
+                method: "POST",
+                body: mailData ? JSON.stringify(mailData) : "",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            return await res.json();
         }
 
         const getUserPaymentTokens = async () => {

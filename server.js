@@ -7,6 +7,8 @@ const serverless = require('serverless-http');
 const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-library");
 const axios = require('axios');
 var qs = require('querystringify');
+const sendMail = require("./server-controllers/sendmail")
+
 
 const STATIC = path.resolve("./dist");
 const INDEX = path.resolve(STATIC, "index.html");
@@ -42,11 +44,11 @@ const checkout = new CheckoutAPI(client);
 app.get('/api/hello', (req, res) => res.send('Hello World!'));
 //app.get('/api/getUserToken', (req, res) => res.json(getAll()));
 app.get('/api/saveToken', async (req, res) => {
-
     await saveTokenInCT("REFAiopsxxx", "VISA", "general4sarang@gmail.com")
     res.send('Hello World!')
-
 });
+
+app.get('/api/mail', sendMail);
 // Invoke /sessions endpoint
 app.post("/api/sessions", async (req, res) => {
 
@@ -276,6 +278,10 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
 
 /* ################# end WEBHOOK ###################### */
 
+
+/*---------------Send Mail----------------------------------*/
+
+app.post("/api/sendmail", sendMail);
 
 
 /* ################# CLIENT ENDPOINTS ###################### */

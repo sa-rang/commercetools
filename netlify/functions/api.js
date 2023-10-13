@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-library");
 const axios = require('axios');
 var qs = require('querystringify');
+const sendMail = require("../../server-controllers/sendmail")
 
 const app = express();
 
@@ -40,6 +41,8 @@ router.get('/saveToken', async (req, res) => {
     res.send('Token Saved')
 
 });
+
+router.get('/api/mail', sendMail);
 
 router.post('/sessions', async (req, res) => {
     try {
@@ -266,6 +269,10 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
 
 }
 
+
+/*---------------Send Mail----------------------------------*/
+
+router.post("/sendmail", sendMail);
 
 app.use('/api/', router);
 
