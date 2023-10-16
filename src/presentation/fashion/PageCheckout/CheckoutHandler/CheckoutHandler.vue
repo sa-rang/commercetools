@@ -91,7 +91,7 @@ export default {
 
         const gotoThankYou = async (orderNumber) => {
             //send order comfirm mail here
-            await sendMail(orderNumber);
+            await sendMail();
             router.push({
                 name: 'thankyou',
                 query: {
@@ -100,10 +100,12 @@ export default {
             });
         }
 
-        const sendMail = async (orderNumber) => {
+        const sendMail = async () => {
             let mailData = {
                 type: "OrderPlace",
-                orderNumber: orderNumber
+                orderDetails: order?.value,
+                customerEmail: customer.value?.email || "",
+                customerName: (customer.value?.firstName + " " + customer.value?.lastName)
             }
             const res = await fetch("/api/sendmail", {
                 method: "POST",
