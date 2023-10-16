@@ -29,32 +29,32 @@ const sendmail = async (req, res) => {
             }
         ];
 
-        let mailCC = []
-        if (process.env.Test_Mail_CC) {
-            mailCC.push(
-                {
-                    Email: "schaudhary@aiopsgroup.com",
-                    Name: "Sarang Chaudhary"
-                },
-                {
-                    Email: "sroy@aiopsgroup.com",
-                    Name: "Souvit Roy"
-                }
-            )
-        }
+        // let mailCC = []
+        // if (process.env.Test_Mail_CC) {
+        //     mailCC.push(
+        //         {
+        //             Email: "schaudhary@aiopsgroup.com",
+        //             Name: "Sarang Chaudhary"
+        //         },
+        //         {
+        //             Email: "sroy@aiopsgroup.com",
+        //             Name: "Souvit Roy"
+        //         }
+        //     )
+        // }
 
         const orderRef = orderDetails.orderNumber;
 
         let fractionDigitsBase = 10 ** orderDetails.totalPrice.fractionDigits;
 
         let currencyCode = orderDetails.totalPrice.currencyCode;
-        let subTotal = orderDetails.lineItems.reduce(
+        let subTotal = (orderDetails.lineItems.reduce(
             (acc, li) => acc + li.totalPrice.centAmount,
             0
-        ) / fractionDigitsBase
+        ) / fractionDigitsBase).toFixed(2)
 
-        let shippingCharges = orderDetails.shippingInfo.price.centAmount / fractionDigitsBase;
-        let orderTotal = orderDetails.totalPrice.centAmount / fractionDigitsBase;
+        let shippingCharges = (orderDetails.shippingInfo.price.centAmount / fractionDigitsBase).toFixed(2);
+        let orderTotal = (orderDetails.totalPrice.centAmount / fractionDigitsBase).toFixed(2);
 
 
         let mailBody = `
@@ -85,7 +85,7 @@ const sendmail = async (req, res) => {
             return `<tr>
                     <td>${eachItem.name}</td>
                     <td>${eachItem.quantity}</td>
-                    <td>${eachItem.totalPrice.currencyCode}. ${eachItem.totalPrice.centAmount / fractionDigitsBase}</td>
+                    <td>${eachItem.totalPrice.currencyCode}. ${(eachItem.totalPrice.centAmount / fractionDigitsBase).toFixed(2)}</td>
                     </tr>`
         }).join("")
             } 
@@ -134,7 +134,7 @@ const sendmail = async (req, res) => {
                     {
                         From: mailFrom,
                         To: mailTo,
-                        cc: mailCC,
+                        //cc: mailCC,
                         Subject: `Your Aiops Commerce order #${orderRef} `,
                         TextPart: `Dear ${customerName}, Your order #${orderRef} has been placed!`,
                         HTMLPart: mailBody
