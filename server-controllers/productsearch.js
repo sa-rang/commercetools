@@ -56,7 +56,7 @@ const productSearch = async (req, res) => {
             if (response?.data) {
                 let Auth_Token = `Bearer ${response.data.access_token}`
                 let GQL_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}/graphql/`
-
+                console.log("auth token", Auth_Token)
                 const document = gql`
                 query products(
                     $locale: Locale!
@@ -150,6 +150,7 @@ const productSearch = async (req, res) => {
                 return request(GQL_URL, document, variables, requestHeaders)
             }
         }).then((searchData) => {
+            console.log("gql")
             res.json(searchData);
         }).catch((err) => {
             res.json({ err });
