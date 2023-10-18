@@ -39,7 +39,7 @@ const productSearch = async (req, res) => {
 
         // get access token
         const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
-        return axios.post(
+        axios.post(
             Auth_URL,
             'grant_type=client_credentials',
             {
@@ -250,8 +250,8 @@ const nlpTrainer = async () => {
     console.log("NLP Trained!")
 }
 
-(async () => {
-    await nlpTrainer()
+(() => {
+    nlpTrainer()
 })();
 
 
