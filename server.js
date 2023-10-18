@@ -8,6 +8,7 @@ const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-libra
 const axios = require('axios');
 var qs = require('querystringify');
 const sendMail = require("./server-controllers/sendmail")
+const productSearch = require("./server-controllers/productsearch")
 
 
 const STATIC = path.resolve("./dist");
@@ -282,6 +283,11 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
 /*---------------Send Mail----------------------------------*/
 
 app.post("/api/sendmail", sendMail);
+
+
+//------------------Product Search------------------
+
+app.get("/api/productsearch", productSearch)
 
 
 /* ################# CLIENT ENDPOINTS ###################### */

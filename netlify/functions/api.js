@@ -6,6 +6,7 @@ const { Client, Config, CheckoutAPI, hmacValidator } = require("@adyen/api-libra
 const axios = require('axios');
 var qs = require('querystringify');
 const sendMail = require("../../server-controllers/sendmail")
+const productSearch = require("../../server-controllers/productsearch")
 
 const app = express();
 
@@ -273,6 +274,10 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
 /*---------------Send Mail----------------------------------*/
 
 router.post("/sendmail", sendMail);
+
+/*--------------Product Search----------------------------------*/
+
+router.get("/productsearch", productSearch);
 
 app.use('/api/', router);
 
