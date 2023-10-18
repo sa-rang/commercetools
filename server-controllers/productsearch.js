@@ -250,9 +250,9 @@ const nlpTrainer = async () => {
     console.log("NLP Trained!")
 }
 
-(() => {
-    nlpTrainer()
-})();
+// (() => {
+//     nlpTrainer()
+// })();
 
 
 module.exports = productSearch
