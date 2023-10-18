@@ -161,7 +161,7 @@ const productSearch = async (req, res) => {
     }
 }
 
-const nlpTrainer = async () => {
+const nlpTrainer = () => {
     // Adds the utterances and intents for the NLP
 
     //price trainer
@@ -245,14 +245,16 @@ const nlpTrainer = async () => {
     // manager.addAnswer('en', 'color.black', 'black');
     // manager.addAnswer('en', 'color.yellow', 'yellow');
 
-    await manager.train();
-    manager.save();
-    console.log("NLP Trained!")
+    manager.train().then(() => {
+        manager.save();
+        console.log("NLP Trained!")
+    })
+
 }
 
-// (() => {
-//     nlpTrainer()
-// })();
+(() => {
+    nlpTrainer()
+})();
 
 
 module.exports = productSearch
