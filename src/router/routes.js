@@ -3,6 +3,7 @@ import config from '../../sunrise.config';
 import Header from 'presentation/Header/Header.vue';
 import Footer from 'presentation/Footer/Footer.vue';
 import Products from 'presentation/ProductList/ProductList.vue';
+import SearchList from 'presentation/SearchList/SearchList.vue'
 import Product from 'presentation/PageProductDetail/PageProductDetail.vue';
 import Checkout from 'presentation/PageCheckout/PageCheckout.vue';
 // import Pay from 'presentation/Pay/Pay.vue';
@@ -40,6 +41,15 @@ export default [
         name: 'products',
         components: {
           default: Products,
+          header: Header,
+          // footer: null,
+        },
+      },
+      {
+        path: 'search-products/:categorySlug/:page?',
+        name: 'SearchList',
+        components: {
+          default: SearchList,
           header: Header,
           // footer: null,
         },

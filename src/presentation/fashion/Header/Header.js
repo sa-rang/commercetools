@@ -46,7 +46,19 @@ export default {
     };
     const doSearch = () => {
       toggleSearch();
-      setSearch(search.value);
+      fetch(`https://6e24-103-135-229-245.ngrok.io/getProducts?search=${search.value}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((data) => {
+        return data.json()
+      }).then((data) => {
+        console.log(data)
+        setSearch(search.value);
+      });
+
+
     };
     const { showStoreSelector, showLocationSelector } =
       useAccessRules();

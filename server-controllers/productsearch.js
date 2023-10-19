@@ -7,40 +7,18 @@ dotenv.config({
     path: "./.env",
 });
 
-const CT_colors = []
-
 const productSearch = async (req, res) => {
     try {
         let qtext = req?.query?.search || " ";
         console.log("getProducts called")
-        // const response = null//await manager.process('en', qtext);
+
         // let Token_b = req.headers.authorization
         // console.log(Token_b)
 
-        const response = await axios.post(
-            'https://api.apilayer.com/nlp/tokenizer',
-            qtext,
-            {
-                params: {
-                    'lang': 'en'
-                },
-                headers: {
-                    'apikey': process.env.APILAYER_KEY,
-                }
-            }
-        );
+        response = await axios.get(`https://6e24-103-135-229-245.ngrok.io/getProducts?search=${qtext}`);
 
-        let queryObj = {}
         console.log(response.data)
-        if (response && response?.data && response?.data?.result && response?.data?.result?.length) {
-            response?.data?.result.map((x) => {
-                if (x.type?.is_digit) {
-                    queryObj["price"] = x?.text || 10000000;
-                }
-            })
-            console.log(queryObj)
-        }
-
+        queryObj = response.data;
         let maxPrice = queryObj?.price ? queryObj?.price * 100 : 1000000000
 
         // get access token
@@ -166,8 +144,6 @@ const productSearch = async (req, res) => {
         res.status(err.statusCode).json(err.message);
     }
 }
-
-
 
 
 module.exports = productSearch
