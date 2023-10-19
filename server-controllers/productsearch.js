@@ -150,7 +150,7 @@ const productSearch = async (req, res) => {
                 return request(GQL_URL, document, variables, requestHeaders)
             }
         }).then((searchData) => {
-            console.log("gql")
+            console.log("gql", Auth_Token)
             res.json(searchData);
         }).catch((err) => {
             res.json({ err });
@@ -247,7 +247,7 @@ const nlpTrainer = () => {
     // manager.addAnswer('en', 'color.yellow', 'yellow');
 
     manager.train().then(() => {
-        manager.save();
+        //manager.save();
         console.log("NLP Trained!")
     })
 
