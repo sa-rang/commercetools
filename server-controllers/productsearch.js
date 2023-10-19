@@ -13,7 +13,7 @@ const productSearch = async (req, res) => {
     try {
         let qtext = req?.query?.search || " ";
         console.log("getProducts called")
-        const response = await manager.process('en', qtext);
+        const response = null//await manager.process('en', qtext);
         // let Token_b = req.headers.authorization
         // console.log(Token_b)
 
