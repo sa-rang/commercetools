@@ -5,8 +5,10 @@ import Spinner from 'presentation/components/Spinner/Spinner.vue';
 import ProductThumbnail from './ProductThumbnail/ProductThumbnail.vue';
 import { useI18n } from 'vue-i18n';
 import transaltion from './SearchList.json'
-import useProductTools from 'hooks/useProductTools';
+import useSearchTools from 'hooks/useSearchTools';
 import useCartTools from 'hooks/useCartTools';
+import { onMounted, shallowRef, watch } from 'vue';
+import { useRoute } from "vue-router";
 
 export default {
   name: 'SearchList',
@@ -21,16 +23,30 @@ export default {
     const { t } = useI18n({
       messages: transaltion
     });
+    const route = useRoute();
     const { addLine } = useCartTools();
     const {
       formatProduct,
-      products,
-      total,
-      loading,
+      searchProducts,
       page,
-      error,
       setPage,
-    } = useProductTools();
+    } = useSearchTools();
+    const products = shallowRef([])
+    const total = shallowRef(0)
+    onMounted(async () => {
+      let searchResult = await searchProducts();
+      products.value = searchResult.results;
+      total.value = searchResult.total;
+    });
+
+    watch(
+      () => route.fullPath,
+      async () => {
+        let searchResult = await searchProducts();
+        products.value = searchResult.results;
+        total.value = searchResult.total;
+      }
+    );
 
     const addToCart = (sku, quantity = 1) =>
       addLine(sku, quantity);
@@ -40,10 +56,8 @@ export default {
       formatProduct,
       products,
       total,
-      loading,
       page,
       setPage,
-      error,
       addToCart,
     };
   },

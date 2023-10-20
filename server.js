@@ -287,7 +287,7 @@ app.post("/api/sendmail", sendMail);
 
 //------------------Product Search------------------
 
-app.get("/api/productsearch", productSearch)
+app.post("/api/productsearch", productSearch)
 
 
 /* ################# CLIENT ENDPOINTS ###################### */

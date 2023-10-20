@@ -277,7 +277,7 @@ router.post("/sendmail", sendMail);
 
 /*--------------Product Search----------------------------------*/
 
-router.get("/productsearch", productSearch);
+router.post("/productsearch", productSearch);
 
 app.use('/api/', router);
 

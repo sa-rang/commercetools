@@ -4,11 +4,11 @@
 
 <template>
   <div class="shop-area pb-100">
-    <div v-if="error">
+    <!-- <div v-if="error">
       <pre>{{ JSON.stringify(error, undefined, 2) }}</pre>
-    </div>
-    <Spinner v-if="loading" />
-    <div class="custom-container" v-else-if="products">
+    </div> -->
+    <!-- <Spinner v-if="loading" /> -->
+    <div class="custom-container" v-if="products">
       <!-- <TopBar
         v-on:toggle-filter="toggleFilter"
         @change-sort="changeSort"

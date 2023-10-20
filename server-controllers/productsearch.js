@@ -4,44 +4,47 @@ const { request, gql } = require('graphql-request')
 
 // parsing the .env file and assigning it to process.env
 dotenv.config({
-    path: "./.env",
+  path: "./.env",
 });
 
 const productSearch = async (req, res) => {
-    try {
-        let qtext = req?.query?.search || " ";
-        console.log("getProducts called")
+  try {
 
-        // let Token_b = req.headers.authorization
-        // console.log(Token_b)
+    console.log("productSearch called")
+    console.log(req.body)
+    const payload = req.body
+    let qtext = payload?.search || " ";
 
-        response = await axios.get(`https://6e24-103-135-229-245.ngrok.io/getProducts?search=${qtext}`);
+    //NLP Tokenization of search string
+    let tokenized = await axios.get(`${process.env.NLP_API}/getTokenizedKeywords?search=${qtext}`);
 
-        console.log(response.data)
-        queryObj = response.data;
-        let maxPrice = queryObj?.price ? queryObj?.price * 100 : 1000000000
+    console.log(tokenized.data)
 
-        // get access token
-        const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
-        axios.post(
-            Auth_URL,
-            'grant_type=client_credentials',
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                auth: {
-                    username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
-                    password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
-                }
-            }
-        ).then((response) => {
-            // if access token found 
-            if (response?.data) {
-                let Auth_Token = `Bearer ${response.data.access_token}`
-                let GQL_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}/graphql/`
+    let queryObj = tokenized.data
 
-                const document = gql`
+    let maxPrice = queryObj?.price ? queryObj?.price * 100 : 1000000000
+
+    // get access token
+    const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
+    axios.post(
+      Auth_URL,
+      'grant_type=client_credentials',
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        auth: {
+          username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
+          password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
+        }
+      }
+    ).then((response) => {
+      // if access token found 
+      if (response?.data) {
+        let Auth_Token = `Bearer ${response.data.access_token}`
+        let GQL_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}/graphql/`
+
+        const document = gql`
                 query products(
                     $locale: Locale!
                     $limit: Int!
@@ -104,46 +107,48 @@ const productSearch = async (req, res) => {
                     }
                 `
 
-                const variables = {
-                    "locale": "en",
-                    "text": qtext,
-                    "limit": 100,
-                    "offset": 0,
-                    "sorts": null,
-                    "priceSelector": {
-                        "currency": "EUR",
-                        "country": "DE",
-                        "channel": null,
-                        "customerGroup": null
-                    },
-                    "filters": [
-                        {
-                            "model": {
-                                "range": {
-                                    "path": "variants.scopedPrice.value.centAmount",
-                                    "ranges": [{ "from": "*", "to": `${maxPrice}` }]
-                                }
-                            }
-                        }
-                    ]
+        const variables = {
+          "locale": "en",
+          "text": qtext,
+          "limit": 10,
+          "offset": payload?.offset || 0,
+          "sorts": null,
+          "priceSelector": {
+            "currency": "EUR",
+            "country": "DE",
+            "channel": null,
+            "customerGroup": null
+          },
+          "filters": [
+            {
+              "model": {
+                "range": {
+                  "path": "variants.scopedPrice.value.centAmount",
+                  "ranges": [{ "from": "*", "to": `${maxPrice}` }]
                 }
-                const requestHeaders = {
-                    "Authorization": Auth_Token
-                }
-
-                return request(GQL_URL, document, variables, requestHeaders)
+              }
             }
-        }).then((searchData) => {
-            res.json(searchData);
-        }).catch((err) => {
-            res.json({ err });
-        });
+          ]
+        }
+        const requestHeaders = {
+          "Authorization": Auth_Token
+        }
 
-    } catch (err) {
-        console.error(`Error: ${err.message}, error code: ${err.statusCode} `);
-        res.status(err.statusCode).json(err.message);
-    }
+        return request(GQL_URL, document, variables, requestHeaders)
+      }
+    }).then((searchData) => {
+      res.json(searchData);
+    }).catch((err) => {
+      res.json({ err });
+    });
+
+  } catch (err) {
+    console.error(`Error: ${err.message}, error code: ${err.statusCode} `);
+    res.status(err.statusCode).json(err.message);
+  }
 }
+
+
 
 
 module.exports = productSearch

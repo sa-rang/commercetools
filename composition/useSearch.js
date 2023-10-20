@@ -9,9 +9,19 @@ const useSearch = () => {
     const params = {
       categorySlug: route?.params?.categorySlug || 'all',
     };
+    // return router.push({
+    //   ...route,
+    //   name: 'products',
+    //   query: {
+    //     ...route.query,
+    //     q,
+    //   },
+    //   params,
+    // });
+
     return router.push({
       ...route,
-      name: 'products',
+      name: 'SearchList',
       query: {
         ...route.query,
         q,
