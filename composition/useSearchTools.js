@@ -1,6 +1,7 @@
 
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { ALL } from '../src/constants';
 
 
 
@@ -15,9 +16,13 @@ function useSearchTools() {
   //   });
 
   const searchProducts = async () => {
+
     let param = {
       search: route?.query?.q || '',
-      offset: route.params.page ? route.params.page * 10 : 0
+      offset: route.params.page ? route.params.page * 10 : 0,
+      categorySlug: route.params.categorySlug === ALL
+        ? null
+        : route.params.categorySlug
     }
     const res = await fetch(`api/productsearch`, {
       method: "POST",
@@ -29,7 +34,7 @@ function useSearchTools() {
     });
     let searchResults = await res.json();
     console.log("pp", searchResults)
-    return { results: searchResults.productProjectionSearch.results, total: searchResults.productProjectionSearch.total }
+    return { results: searchResults.results, total: searchResults.total, filterFacets: searchResults.facets }
   }
 
   const setPage = (page) =>

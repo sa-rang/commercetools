@@ -32,7 +32,8 @@
       </div>
       <div class="product-content text-center mt-15">
         <h3>
-          <router-link :to="productRoute(product.slug, product.sku)" data-test="product-thumbnail-name">{{ product.name }}
+          <router-link :to="productRoute(product.slug, product.sku)"
+            data-test="product-thumbnail-name">{{ productName(product.name) }}
           </router-link>
         </h3>
         <div class="product-price" v-if="hasPrice">

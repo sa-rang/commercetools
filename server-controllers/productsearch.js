@@ -1,6 +1,7 @@
 const dotenv = require("dotenv");
 const axios = require('axios');
 const { request, gql } = require('graphql-request')
+var qs = require('querystringify');
 
 // parsing the .env file and assigning it to process.env
 dotenv.config({
@@ -10,15 +11,18 @@ dotenv.config({
 const productSearch = async (req, res) => {
   try {
 
-    console.log("productSearch called")
-    console.log(req.body)
+
+    console.log("search params: ", req.body)
     const payload = req.body
     let qtext = payload?.search || " ";
+    const GQL_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}/graphql/`
+    let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
+    let requestHeaders = null;
 
     //NLP Tokenization of search string
     let tokenized = await axios.get(`${process.env.NLP_API}/getTokenizedKeywords?search=${qtext}`);
 
-    console.log(tokenized.data)
+    console.log("NLPTokens: ", tokenized.data)
 
     let queryObj = tokenized.data
 
@@ -41,104 +45,68 @@ const productSearch = async (req, res) => {
     ).then((response) => {
       // if access token found 
       if (response?.data) {
-        let Auth_Token = `Bearer ${response.data.access_token}`
-        let GQL_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}/graphql/`
+        requestHeaders = {
+          "Authorization": `Bearer ${response.data.access_token}`
+        }
 
-        const document = gql`
-                query products(
-                    $locale: Locale!
-                    $limit: Int!
-                    $offset: Int!
-                    $priceSelector: PriceSelectorInput!
-                    $sorts: [String!] = []
-                    $filters: [SearchFilterInput!] = [],
-                    $text: String = ""
-                  ) {
-                    productProjectionSearch(
-                      locale: $locale
-                      text: $text
-                      limit: $limit
-                      offset: $offset
-                      sorts: $sorts
-                      priceSelector: $priceSelector
-                      filters: $filters
-                    ) {
-                      total
-                      results {
-                        # better never select id or cache breaks
-                        # https://github.com/apollographql/apollo-client/issues/9429
-                        productId: id
-                        name(locale: $locale)
-                        slug(locale: $locale)
-
-                        masterVariant {
-                            # better never select id or cache breaks
-                            # https://github.com/apollographql/apollo-client/issues/9429
-                            variantId: id
-                            sku
-                            images {
-                                 url 
-                            }
-                            attributesRaw {
-                              name
-                              value
-                            }
-                            scopedPrice {
-                              value {
-                                currencyCode
-                                centAmount
-                                fractionDigits
-                              }
-                              discounted {
-                                discount {
-                                  name(locale: $locale)
-                                }
-                                value {
-                                  currencyCode
-                                  centAmount
-                                  fractionDigits
-                                }
-                              }
-                              country
-                            }
-                          }
-                        }
-                      }
-                    }
-                `
-
-        const variables = {
-          "locale": "en",
-          "text": qtext,
-          "limit": 10,
-          "offset": payload?.offset || 0,
-          "sorts": null,
-          "priceSelector": {
-            "currency": "EUR",
-            "country": "DE",
-            "channel": null,
-            "customerGroup": null
-          },
-          "filters": [
-            {
-              "model": {
-                "range": {
-                  "path": "variants.scopedPrice.value.centAmount",
-                  "ranges": [{ "from": "*", "to": `${maxPrice}` }]
-                }
+        // if categorySlug found find categoryid and use it in Documentfilter
+        if (payload.categorySlug) {
+          const categoryQuery = gql`
+          query categories($locale: Locale! , $where: String!, $sort: [String!] = []) {
+            categories(sort: $sort, where: $where) {
+              count
+              total
+              results {
+                id
+                slug(locale: $locale)
+                name(locale: $locale)
               }
             }
-          ]
-        }
-        const requestHeaders = {
-          "Authorization": Auth_Token
-        }
+          }
+        `;
+          const categoryQueryVariables = {
+            "locale": "en",
+            "sort": [],
+            "where": `slug(en="${payload.categorySlug}")`
+          }
+          return request(GQL_URL, categoryQuery, categoryQueryVariables, requestHeaders)
+        } else {
 
-        return request(GQL_URL, document, variables, requestHeaders)
+          Promise.resolve(null);
+        }
       }
+    }).then((categoryData) => {
+      let categortId = null;
+      let query = {
+        "text.en": `\"${qtext}\"`,
+        "limit": 10,
+        "offset": payload?.offset || 0,
+        "sorts": null,
+        "priceCurrency": "EUR",
+        "priceCountry": "DE",
+        //"priceCustomerGroup": null,
+        //"priceChannel": null
+      }
+      if (categoryData && categoryData.categories && categoryData.categories.count > 0) {
+        categortId = categoryData.categories?.results[0]?.id || null
+        query["categories.id"] = `\"${categortId}\"`
+      }
+
+      query = qs.stringify(query);
+
+      //Filter and Facate will be repeated so cannot be added as object keys. Add them one by one as Query string
+      query = query + "&" + qs.stringify({ "filter": `variants.price.centAmount:range (* to ${maxPrice})` });
+      query = query + "&" + qs.stringify({ "facet": "variants.attributes.colors" });
+      query = query + "&" + qs.stringify({ "facet": "variants.attributes.size" });
+      console.log(query)
+      return axios.get(`${CT_API_URL}/product-projections/search?${query}`, {
+        headers: requestHeaders
+      })
     }).then((searchData) => {
-      res.json(searchData);
+      console.log("returned search data")
+      res.json(searchData.data);
     }).catch((err) => {
+      console.error(`Error: ${err} `);
       res.json({ err });
     });
 

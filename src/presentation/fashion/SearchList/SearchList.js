@@ -9,7 +9,7 @@ import useSearchTools from 'hooks/useSearchTools';
 import useCartTools from 'hooks/useCartTools';
 import { onMounted, shallowRef, watch } from 'vue';
 import { useRoute } from "vue-router";
-
+import PocProductFilter from './PocProductFilter/PocProductFilter.vue';
 export default {
   name: 'SearchList',
   components: {
@@ -18,6 +18,7 @@ export default {
     Pagination,
     // ProductFilter,
     // TopBar,
+    PocProductFilter
   },
   setup() {
     const { t } = useI18n({
@@ -33,18 +34,25 @@ export default {
     } = useSearchTools();
     const products = shallowRef([])
     const total = shallowRef(0)
+    const filterFacets = shallowRef([])
+    const loading = shallowRef(true)
     onMounted(async () => {
+
       let searchResult = await searchProducts();
+      loading.value = false;
       products.value = searchResult.results;
       total.value = searchResult.total;
+      filterFacets.value = searchResult.filterFacets;
     });
 
     watch(
       () => route.fullPath,
       async () => {
         let searchResult = await searchProducts();
+        loading.value = false;
         products.value = searchResult.results;
         total.value = searchResult.total;
+        filterFacets.value = searchResult.filterFacets;
       }
     );
 
@@ -55,10 +63,12 @@ export default {
       t,
       formatProduct,
       products,
+      loading,
       total,
       page,
       setPage,
       addToCart,
+      filterFacets
     };
   },
 };

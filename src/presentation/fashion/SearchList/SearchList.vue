@@ -7,7 +7,7 @@
     <!-- <div v-if="error">
       <pre>{{ JSON.stringify(error, undefined, 2) }}</pre>
     </div> -->
-    <!-- <Spinner v-if="loading" /> -->
+    <Spinner v-if="loading" />
     <div class="custom-container" v-if="products">
       <!-- <TopBar
         v-on:toggle-filter="toggleFilter"
@@ -26,23 +26,31 @@
         :allChannels="allChannels"
         v-bind:show="show"
       /> -->
-      <div class="shop-wrapper" v-if="products.length">
-        <div class="row">
-          <!-- @open-quick-view="openQuickView"
-            @open-add-shopping-list="openAddToShoppingList" -->
-          <ProductThumbnail v-for="product in products" data-test="product-list" :key="product.id"
-            :product="formatProduct(product)" :addToCart="addToCart" />
+      <div class="row">
+        <div class="col-sm-4 col-md-2">
+          <PocProductFilter :filters="filterFacets" />
         </div>
-        <Pagination :total="total" :page="page" :setPage="setPage" />
+        <div class="col-sm-8 col-md-10">
+          <div class="shop-wrapper" v-if="products.length">
+            <div class="row">
+              <!-- @open-quick-view="openQuickView"
+            @open-add-shopping-list="openAddToShoppingList" -->
+              <ProductThumbnail v-for="product in products" data-test="product-list" :key="product.id"
+                :product="formatProduct(product)" :addToCart="addToCart" />
+            </div>
+            <Pagination :total="total" :page="page" :setPage="setPage" />
+          </div>
+
+          <div v-else>
+            <div class="empty-results-container">
+              <span class="empty-results" data-test="empty-results">
+                <!-- {{ t('notFound') }} -->
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div v-else>
-        <div class="empty-results-container">
-          <span class="empty-results" data-test="empty-results">
-            {{ t('notFound') }}
-          </span>
-        </div>
-      </div>
     </div>
     <div v-else>
       <div class="empty-results-container">

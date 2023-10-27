@@ -1,7 +1,8 @@
 import { useI18n } from 'vue-i18n';
-import locale from "./ProductThumbnail.json"
+import localeJson from "./ProductThumbnail.json"
 import BasePrice from 'presentation/components/BasePrice/BasePrice.vue';
 import { computed } from 'vue';
+import useLocale from 'hooks/useLocale';
 
 export default {
   name: 'ProductThumbnail',
@@ -19,13 +20,16 @@ export default {
     },
   },
   setup(props) {
+    const { locale } = useLocale();
+
     const productRoute = (productSlug, sku) => ({
       name: 'product',
       params: {
-        productSlug,
+        productSlug: productSlug[locale.value],
         sku,
       },
     });
+    const productName = (productName) => productName[locale.value];
     const displayedImageUrl = (variant) => {
       if (
         Array.isArray(variant.images) &&
@@ -36,7 +40,7 @@ export default {
       return require('presentation/assets/img/missing.svg');
     };
     const { t } = useI18n({
-      messages: locale
+      messages: localeJson
     });
     const hasPrice = computed(
       () => props?.product?.masterVariant?.scopedPrice
@@ -52,6 +56,7 @@ export default {
       t,
       hasPrice,
       hasDiscount,
+      productName
     };
   },
 };
