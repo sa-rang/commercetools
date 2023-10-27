@@ -44,8 +44,9 @@ export default {
     const tools = useCustomerTools();
     const customerSignMeIn = () =>
       tools.login(form.value.email, form.value.password);
-    const getErrorMessage = ({ code }) => {
-      if (code === 'InvalidCredentials') {
+    const getErrorMessage = (err) => {
+      console.log(err)
+      if (err?.extensions?.code === 'InvalidCredentials') {
         return t('invalidCredentials');
       }
       return t('unknownError');

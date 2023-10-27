@@ -8,7 +8,7 @@
     "rememberMe": "Remember Me",
     "forgotPassword": "Forgot your password?",
     "signIn": "Sign In",
-    "invalidCredentials": "Invalid credentials"
+    "invalidCredentials": "Please enter a valid username or password"
   },
   "de": {
     "title": "Kundenanmeldung",
