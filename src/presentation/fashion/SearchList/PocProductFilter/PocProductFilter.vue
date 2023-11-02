@@ -14,7 +14,7 @@
                                 @click="toggelFilter" type="checkbox" />
                             <span>
                                 {{ eachValue.term }}
-                                <span class="font-italic font-weight-lighter ml-1">({{ eachValue.count }})</span>
+                                <!-- <span class="font-italic font-weight-lighter ml-1">({{ eachValue.count }})</span> -->
                             </span>
                         </div>
                     </div>
@@ -27,7 +27,7 @@
                                 @click="toggelFilter" type="checkbox" />
                             <span>
                                 {{ eachValue.term }}
-                                <span class="font-italic font-weight-lighter ml-1">({{ eachValue.count }})</span>
+                                <!-- <span class="font-italic font-weight-lighter ml-1">({{ eachValue.count }})</span> -->
                             </span>
                         </div>
                     </div>
