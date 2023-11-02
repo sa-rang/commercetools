@@ -3,7 +3,7 @@
         <div class="poc-product-filter">
             <div class="border-bottom mb-3 d-flex justify-content-between">
                 <strong>Filters </strong>
-                <button class="btn mb-2" @click="clearFilter">Clear All</button>
+                <button class="btn-clearall mb-2" @click="clearFilter">Clear All</button>
             </div>
             <div v-for="eachFilter in filtersAll" :key="eachFilter.filter">
                 <div v-if="eachFilter.filter == 'color'" class="">
@@ -168,7 +168,7 @@ export default {
         background: #f1f1f1;
     }
 
-    .btn {
+    .btn-clearall {
         padding: 12px 20px;
     }
 }
