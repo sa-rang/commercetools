@@ -10,11 +10,11 @@ dotenv.config({
 
 const productSearch = async (req, res) => {
   try {
-
-
     console.log("search params: ", req.body)
     const payload = req.body
     let qtext = payload?.search || " ";
+    let qColor = payload?.color || null;
+    let qSize = payload?.size || null;
     const GQL_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}/graphql/`
     let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
     let requestHeaders = null;
@@ -96,7 +96,19 @@ const productSearch = async (req, res) => {
 
       //Filter and Facate will be repeated so cannot be added as object keys. Add them one by one as Query string
       query = query + "&" + qs.stringify({ "filter": `variants.price.centAmount:range (* to ${maxPrice})` });
-      query = query + "&" + qs.stringify({ "facet": "variants.attributes.colors" });
+      if (qSize) {
+        let allSizeStrArr = qSize.split(",").map((x) => '"' + x + '"');
+        console.log("sizes", allSizeStrArr.toString())
+        query = query + "&" + qs.stringify({ "filter": `variants.attributes.size:${allSizeStrArr.toString()}` });
+      }
+      if (qColor) {
+        let allColorStrArr = qColor.split(",").map((x) => '"' + x + '"');
+        console.log("colors", allColorStrArr.toString())
+        query = query + "&" + qs.stringify({ "filter": `variants.attributes.color.label.en:${allColorStrArr.toString()}` });
+      }
+
+      //Facets
+      query = query + "&" + qs.stringify({ "facet": "variants.attributes.color.label.en" });
       query = query + "&" + qs.stringify({ "facet": "variants.attributes.size" });
       console.log(query)
       return axios.get(`${CT_API_URL}/product-projections/search?${query}`, {

@@ -22,7 +22,9 @@ function useSearchTools() {
       offset: route.params.page ? route.params.page * 10 : 0,
       categorySlug: route.params.categorySlug === ALL
         ? null
-        : route.params.categorySlug
+        : route.params.categorySlug,
+      size: route?.query?.size || "",
+      color: route?.query?.color || ""
     }
     const res = await fetch(`api/productsearch`, {
       method: "POST",
@@ -33,7 +35,7 @@ function useSearchTools() {
 
     });
     let searchResults = await res.json();
-    console.log("pp", searchResults)
+    //console.log("Search", searchResults)
     return { results: searchResults.results, total: searchResults.total, filterFacets: searchResults.facets }
   }
 
