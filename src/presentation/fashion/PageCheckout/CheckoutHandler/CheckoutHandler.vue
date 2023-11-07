@@ -16,7 +16,7 @@
                     </div>
                     <div class="col-lg-6 offset-lg-3 ">
                         <Payment v-if="!loading && order.totalPrice" :amount="order.totalPrice"
-                            :ordernumber="order.orderNumber" @payment-status="addPaymentOnOrder" />
+                            :ordernumber="order.orderNumber" @payment-status="handlePayStatus" />
                     </div>
                 </div>
                 <div class="row" v-if="orderTransMsg">
@@ -32,7 +32,7 @@
 <script >
 import Payment from 'presentation/PageCheckout/Payment/Payment.vue';
 import { onMounted, shallowRef, watch } from 'vue';
-import useCartTools from 'hooks/useCartTools';
+//import useCartTools from 'hooks/useCartTools';
 import { useRoute, useRouter } from 'vue-router';
 import useMyOrderBasic from 'hooks/ct/useMyOrder';
 import useLocale from 'hooks/useLocale';
@@ -44,7 +44,7 @@ export default {
     },
 
     setup() {
-        const cartTools = useCartTools();
+        //// const cartTools = useCartTools();
         const route = useRoute();
         const router = useRouter();
         const orderTransMsg = shallowRef(null);
@@ -70,23 +70,33 @@ export default {
         });
 
         const addPaymentOnOrder = async (iPayData) => {
+            console.log(iPayData)
 
-            cartTools.createPaymentAndUpdateOrder({
-                method: iPayData.payMethod,
-                payId: iPayData.paymentRef,
-                payStatus: iPayData.resultCode,
-                centAmount: iPayData.centAmount,
-                orderId: route.query.id,
-                orderVersion: parseInt(route.query.v),
+            // cartTools.createPaymentAndUpdateOrder({
+            //     method: iPayData.payMethod,
+            //     payId: iPayData.paymentRef,
+            //     payStatus: iPayData.resultCode,
+            //     centAmount: iPayData.centAmount,
+            //     orderId: route.query.id,
+            //     orderVersion: parseInt(route.query.v),
 
-            }).then(({ data }) => {
-                let orderData = data?.updateOrder
-                if (orderData && orderData?.orderNumber && orderData?.orderState == "Confirmed") {
-                    gotoThankYou(data?.updateOrder?.orderNumber)
-                } else {
-                    orderTransMsg.value = "Order not confirmed!"
-                }
-            }).catch((error) => console.warn('error:', error));
+            // }).then(({ data }) => {
+            //     let orderData = data?.updateOrder
+            //     if (orderData && orderData?.orderNumber && orderData?.orderState == "Open") {
+            //         //gotoThankYou(data?.updateOrder?.orderNumber)
+            //         console.log("pay Obj created")
+            //     } else {
+            //         orderTransMsg.value = "Order not confirmed!"
+            //     }
+            // }).catch((error) => console.warn('error:', error));
+
+            //gotoThankYou(iPayData.paymentRef)
+        }
+
+        const handlePayStatus = async (iPayData) => {
+            console.log("pay-res", iPayData.resultCode)
+
+            gotoThankYou(order.value?.orderNumber)
         }
 
         const gotoThankYou = async (orderNumber) => {
@@ -122,7 +132,7 @@ export default {
                 let tokens = [];
                 if (customer.value?.custom?.customFieldsRaw && customer.value?.custom?.customFieldsRaw.length > 0) {
                     let rawFields = customer.value?.custom?.customFieldsRaw;
-                    let PayRef = rawFields.find(o => o.name === 'pspAuthorizationCode');
+                    let PayRef = rawFields.find(o => o.name === 'pspAuthCode');
                     if (PayRef) {
                         let splitValue = PayRef.value.split("**");
                         if (splitValue && splitValue.length == 3) {
@@ -172,14 +182,14 @@ export default {
                     resultCode: response.resultCode,
                     centAmount: response.amount.value,
                 }
-                await addPaymentOnOrder(payRes);
+                await handlePayStatus(payRes);
             } catch (error) {
                 console.error(error);
                 alert("Error occurred. Look at console for details");
             }
         }
 
-        return { loading, order, orderTransMsg, loadPaymentInterface, getUserPayTokens, addPaymentOnOrder, initiateReccuringPayment }
+        return { loading, order, orderTransMsg, loadPaymentInterface, getUserPayTokens, handlePayStatus, addPaymentOnOrder, initiateReccuringPayment }
     }
 }
 </script>

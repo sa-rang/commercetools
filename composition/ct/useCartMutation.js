@@ -46,9 +46,9 @@ export const createPayment = ({
 export const createPaymentV2 = ({
   currency,
   centAmount,
-  method,
-  payId,
-  payStatus
+  // method,
+  // payId,
+  // payStatus
 }) =>
   apolloClient
     .mutate({
@@ -66,13 +66,13 @@ export const createPaymentV2 = ({
             currencyCode: currency,
             centAmount,
           },
-          paymentMethodInfo: {
-            method,
-            paymentInterface: payId
-          },
-          paymentStatus: {
-            interfaceText: payStatus
-          }
+          // paymentMethodInfo: {
+          //   method,
+          //   paymentInterface: payId
+          // },
+          // paymentStatus: {
+          //   interfaceText: payStatus
+          // }
         },
       },
     })
@@ -337,7 +337,7 @@ export const replicateCartMutation = ({ orderId }) =>
 
 
 
-export const addOrderNumberUpdateOrder = ({ orderId, orderNumber, version }) => {
+export const addOrderNumberUpdateOrder = ({ orderId, orderNumber, version, paymentId }) => {
   return apolloClient.mutate({
     mutation: gql`
           mutation addOrderNumberOnOrder(
@@ -366,6 +366,14 @@ export const addOrderNumberUpdateOrder = ({ orderId, orderNumber, version }) => 
         {
           changeOrderState: { orderState: "Open" }
         },
+        {
+          addPayment: {
+            payment: { typeId: "payment", id: paymentId }
+          }
+        },
+        {
+          changePaymentState: { paymentState: "Pending" }
+        }
       ]
     }
   });

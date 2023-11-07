@@ -1,4 +1,4 @@
-import org, { createPayment, createPaymentV2, addPaymentOnOrder, addOrderNumberUpdateOrder, replicateCartMutation, updateOrderStatus } from './ct/useCartMutation';
+import org, { createPayment, createPaymentV2, addOrderNumberUpdateOrder, replicateCartMutation, updateOrderStatus } from './ct/useCartMutation';
 import useCurrency from './useCurrency';
 import useLocation from './useLocation';
 import {
@@ -142,35 +142,36 @@ export const useCartActions = () => {
           createMyOrderFromCart(id, version)
         );
       }).then(({ data }) => { //set odernumber from FE
-        let orderNumber = "AiOPS-" + new Date().valueOf();
+        //let orderNumber = "AiOPS-" + new Date().valueOf();
         // link payment to order in CT
-        return addOrderNumberUpdateOrder({ orderId: data.createMyOrderFromCart.orderId, orderNumber, version: data.createMyOrderFromCart.version })
+        //return addOrderNumberUpdateOrder({ orderId: data.createMyOrderFromCart.orderId, orderNumber, version: data.createMyOrderFromCart.version })
+
+        return createPaymentAndUpdateOrder({ centAmount: 0, orderId: data.createMyOrderFromCart.orderId, version: data.createMyOrderFromCart.version })
       })
     });
   };
 
-  const createPaymentAndUpdateOrder = ({ method, payId, payStatus, centAmount, orderId, orderVersion }) => {
+  const createPaymentAndUpdateOrder = async ({ centAmount, orderId, version }) => {
 
-    let CTorderStatus = "Open" // Confirmed Complete Cancelled
-    let CTpayStatus = "Pending" // BalanceDue CreditOwed Failed Paid
+    //let CTorderStatus = "Open" // Confirmed Complete Cancelled
+    //let CTpayStatus = "Pending" // BalanceDue CreditOwed Failed Paid
     //let orderNumber = "AiOPS-" + new Date().valueOf();
 
-    if (payStatus == "Authorised") {
-      CTorderStatus = "Confirmed"
-      CTpayStatus = "Paid"
-    }
+    // if (payStatus == "Authorised") {
+    //   CTorderStatus = "Open"
+    //   CTpayStatus = "BalanceDue"
+    // }
 
     // create payment in CT
     return createPaymentV2({
       currency: currency.value,
       centAmount: centAmount,
-      method,
-      payId,
-      payStatus
     })
       .then(({ id }) => {
         // link payment to order in CT
-        return addPaymentOnOrder({ orderId: orderId, version: orderVersion, paymentId: id, CTorderStatus, CTpayStatus })
+        //return addPaymentOnOrder({ orderId: orderId, version: orderVersion, paymentId: id, CTorderStatus, CTpayStatus })
+        let orderNumber = "AiOPS-" + new Date().valueOf();
+        return addOrderNumberUpdateOrder({ orderId, orderNumber, version, paymentId: id })
       })
   };
 

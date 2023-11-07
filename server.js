@@ -79,7 +79,11 @@ app.post("/api/sessions", async (req, res) => {
             shopperReference: payload.customerRef,
             shopperInteraction: "Ecommerce",
             recurringProcessingModel: "Subscription",
-            enableRecurring: true
+            enableRecurring: true,
+            //Pre-Auth settings
+            additionalData: {
+                authorisationType: "PreAuth"
+            }
         });
         res.json({ response, clientKey: process.env.ADYEN_CLIENT_KEY });
 
@@ -112,6 +116,109 @@ app.post("/api/recpayment", async (req, res) => {
     } catch (err) {
         console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
         res.status(err.statusCode).json(err.message);
+    }
+});
+
+// payment capture api
+app.post("/api/capture", async (req, res) => {
+    try {
+        const payload = req.body
+        const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
+        //Step1: Get Access Token
+        let Token = await axios.post(
+            Auth_URL,
+            'grant_type=client_credentials',
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                auth: {
+                    username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
+                    password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
+                }
+            }
+        )
+        // if access token found 
+        if (Token?.data) {
+            let Auth_Token = `Bearer ${Token.data.access_token}`
+            let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
+
+            //get order data
+            let orderData = await axios.get(`${CT_API_URL}/orders/order-number=${payload?.orderNumber}`, {
+                headers: {
+                    'Authorization': Auth_Token
+                }
+            })
+
+            if (orderData?.data?.paymentInfo?.payments && orderData?.data?.paymentInfo?.payments.length > 0) {
+
+                let orderAmount = orderData?.data?.totalPrice?.centAmount || 0
+                let orderCurrency = orderData?.data?.totalPrice?.currencyCode || "EUR"
+                let orderNumber = orderData?.data?.orderNumber
+                let orderId = orderData?.data?.id
+                let orderVersion = orderData?.data?.version
+
+
+                let paymentObj = orderData?.data?.paymentInfo?.payments[0];
+                let paymentId = paymentObj?.id || ""
+
+                //get the payment object
+                let payamentData = await axios.get(`${CT_API_URL}/payments/${paymentId}`, {
+                    headers: {
+                        'Authorization': Auth_Token
+                    }
+                })
+
+                if (payamentData?.data && payamentData?.data?.paymentMethodInfo && payamentData?.data?.paymentMethodInfo?.paymentInterface) {
+                    let pspRef = payamentData?.data?.paymentMethodInfo?.paymentInterface;
+                    console.log(`capture PSP [${pspRef}]  found for `, orderNumber)
+                    const paymentCaptureRes = await checkout.captures(pspRef, {
+                        amount: { currency: orderCurrency, value: orderAmount },
+                        reference: orderNumber,
+                        merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+                    });
+
+
+                    if (paymentCaptureRes && paymentCaptureRes?.status && paymentCaptureRes?.status.toLowerCase() == "received") {
+                        //  update order status as Confirmed & payState as Paid and ShipingState as Shipped
+                        console.log("payment Capture:", paymentCaptureRes?.status)
+                        let orderUpdateRes = await axios.post(`${CT_API_URL}/orders/${orderId}`,
+                            {
+                                "version": orderVersion,
+                                "actions": [
+                                    {
+                                        "action": "changeOrderState",
+                                        "orderState": `Confirmed`
+                                    },
+                                    {
+                                        "action": "changeShipmentState",
+                                        "shipmentState": `Shipped`
+                                    },
+                                    {
+                                        "action": "changePaymentState",
+                                        "paymentState": `Paid`
+                                    }
+                                ]
+                            },
+                            {
+                                headers: {
+                                    'Authorization': Auth_Token,
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        )
+
+                        console.log("order updated")
+
+                        res.json({ capture: paymentCaptureRes?.status, order: orderUpdateRes?.data });
+                    }
+
+                }
+            }
+        }
+    } catch (err) {
+        console.error(`Error: ${err.message}`);
+        res.json({ Error: err.message });
     }
 });
 
@@ -202,7 +309,9 @@ const consumeEvent = async (notification) => {
 
     } else if (notification.eventCode == "AUTHORISATION") {
         // webhook with payment authorisation
-        console.log("Payment authorized - pspReference:" + notification.pspReference + " eventCode:" + notification.eventCode);
+        // console.log(JSON.stringify(notification))
+        console.log("Payment authorized - pspReference:" + notification.pspReference + " eventCode:" + notification.eventCode + "merchantReference" + notification.merchantReference);
+        return savePSPonOrderInCT(notification.pspReference, notification.merchantReference)
     } else {
         console.log("Unexpected eventCode: " + notification.eventCode);
     }
@@ -254,7 +363,7 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
                                 },
                                 {
                                     "action": "setCustomField",
-                                    "name": "pspAuthorizationCode",
+                                    "name": "pspAuthCode",
                                     "value": `${recurringDetailReference}**${paymentMethod}**${shopperReference}`
                                 }
                             ]
@@ -267,14 +376,130 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
                         }
                     ).then((result) => {
                         console.log(result.data);
-                    });
+                    }).catch((err) => {
+                        console.log(err)
+                    });;
                 }
-            });
+            }).catch((err) => {
+                console.log(err)
+            });;
         }
     });
+}
+
+const savePSPonOrderInCT = (pspRef, orderNumber) => {
+    console.log("savePSP for Future Capture")
+    // get access token
+    const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
+    let orderId = null;
+    let orderVersion = 1;
+
+    //Step1: Get Access Token
+    return axios.post(
+        Auth_URL,
+        'grant_type=client_credentials',
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            auth: {
+                username: `${process.env.VUE_APP_CT_CLIENT_ID}`,
+                password: `${process.env.VUE_APP_CT_CLIENT_SECRET}`
+            }
+        }
+    ).then((response) => {
+        // if access token found 
+        if (response?.data) {
+            let Auth_Token = `Bearer ${response.data.access_token}`
+            let CT_API_URL = `${process.env.VUE_APP_CT_API_HOST}/${process.env.VUE_APP_CT_PROJECT_KEY}`
+
+            //Step:2 get the order details
+
+            return axios.get(`${CT_API_URL}/orders/order-number=${orderNumber}`, {
+                headers: {
+                    'Authorization': Auth_Token
+                }
+            }).then((orderData) => {
 
 
+                if (orderData?.data?.paymentInfo?.payments && orderData?.data?.paymentInfo?.payments.length > 0) {
+                    orderId = orderData?.data?.id;
+                    orderVersion = orderData?.data?.version;
+                    let paymentObj = orderData?.data?.paymentInfo?.payments[0];
+                    let paymentId = paymentObj?.id || ""
+                    console.log("order with payment obj found")
+                    //Step 3: get the payment object
+                    return axios.get(`${CT_API_URL}/payments/${paymentId}`, {
+                        headers: {
+                            'Authorization': Auth_Token
+                        }
+                    }).catch((err) => {
+                        console.log(err)
+                    });
+                }
+            }).then((payData) => {
+                if (payData?.data) {
+                    let paymentObj = payData?.data;
+                    let paymentId = paymentObj?.id || ""
+                    let payVersion = paymentObj?.version
+                    console.log("payment Obj found: ", paymentId)
+                    //Step 4:  set pspref in payment object 
+                    return axios.post(`${CT_API_URL}/payments/${paymentId}`,
+                        {
+                            "version": payVersion,
+                            "actions": [
+                                {
+                                    "action": "setMethodInfoInterface",
+                                    "interface": `${pspRef}`
+                                }
+                            ]
+                        },
+                        {
+                            headers: {
+                                'Authorization': Auth_Token,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    ).catch((err) => {
+                        console.log(err)
+                    });
+                }
+            }).then((payUpdateRes) => {
 
+
+                if (payUpdateRes?.data) {
+                    console.log("start order update to 'confirm'")
+                    //Step 5:  update order status as BalanceDue on Authorization
+                    return axios.post(`${CT_API_URL}/orders/${orderId}`,
+                        {
+                            "version": orderVersion,
+                            "actions": [
+                                {
+                                    "action": "changePaymentState",
+                                    "paymentState": `BalanceDue`
+                                }
+                            ]
+                        },
+                        {
+                            headers: {
+                                'Authorization': Auth_Token,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    ).then((result) => {
+                        console.log("updated order status:", result?.data?.orderState);
+
+                    }).catch((err) => {
+                        console.log(err)
+                    });
+                }
+            }).catch((err) => {
+                console.log(err)
+            });;
+        }
+    }).catch((err) => {
+        console.log(err)
+    });;
 }
 
 /* ################# end WEBHOOK ###################### */

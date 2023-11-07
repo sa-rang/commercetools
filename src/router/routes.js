@@ -24,6 +24,7 @@ import Home from 'presentation/Home/Home.vue';
 import StoreLocator from 'presentation/Stores/StoreLocator.vue';
 import ContactUs from "presentation/ContactUs/ContactUs.vue"
 import Search from "presentation/Search/Search.vue"
+import PayAdmin from "presentation/PayAdmin/PayAdmin.vue"
 
 const requiresAuth = true;
 export default [
@@ -213,6 +214,15 @@ export default [
         name: 'search',
         components: {
           default: Search,
+          header: Header,
+          footer: Footer,
+        },
+      },
+      {
+        path: 'pay-admin',
+        name: 'pay-admin',
+        components: {
+          default: PayAdmin,
           header: Header,
           footer: Footer,
         },

@@ -116,11 +116,15 @@ const query = gql`
             paymentStatus {
               interfaceCode
             }
+            paymentMethodInfo {
+              paymentInterface
+            }
           }
           paymentRefs{
-            id,
+            id
             typeId
           }
+         
         }
         returnInfo {
           items {

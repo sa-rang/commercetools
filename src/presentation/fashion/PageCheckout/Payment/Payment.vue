@@ -131,6 +131,7 @@ export default {
                     actions.resolve(data);
                 },
                 onPaymentCompleted: (result, component) => {
+                    console.log(result)
                     handleServerResponse(result, component);
                 },
                 onError: (error, component) => {
