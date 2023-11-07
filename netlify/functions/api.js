@@ -112,7 +112,7 @@ router.post("/recpayment", async (req, res) => {
 });
 
 // payment capture api
-app.post("/capture", async (req, res) => {
+router.post("/capture", async (req, res) => {
     try {
         const payload = req.body
         const Auth_URL = `${process.env.VUE_APP_CT_AUTH_HOST}/oauth/token`
