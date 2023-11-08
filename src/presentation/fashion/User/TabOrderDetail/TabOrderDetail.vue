@@ -38,11 +38,11 @@
               </button>
             </router-link>
           </div>
-          <div v-if="order.orderState == 'Open' || order.orderState == 'Confirmed' || order.orderState == 'Cancelled'">
+          <!-- <div v-if="order.orderState == 'Open' || order.orderState == 'Confirmed' || order.orderState == 'Cancelled'">
             <button class="ml-1" data-toggle="modal" data-target="#exampleModal">
               Modify
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="row pt-30">

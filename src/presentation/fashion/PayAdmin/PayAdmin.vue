@@ -1,7 +1,6 @@
 
 <template>
   <div class="container pt-80 pb-100">
-
     <div class="row mt-30">
       <div class="col-md-6">
         <h3>Capture Payment</h3>
@@ -10,9 +9,11 @@
         <button class="mt-30" @click="capturePayment">Capture Payment</button>
       </div>
       <div v-if="captureResult && captureResult.capture == 'received'" class="col-md-6">
-        <h4 class="text-success">Payment Captured for {{ orderNumber }}</h4>
+        <h4 class="text-success">Payment captured for {{ orderNumber }}</h4>
       </div>
-
+      <div v-else-if="captureResult && captureResult.capture == 'alreadyreceived'" class="col-md-6">
+        <h4 class="text-success">Payment already received for {{ orderNumber }}</h4>
+      </div>
     </div>
   </div>
 </template>

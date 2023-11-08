@@ -142,7 +142,10 @@ router.post("/capture", async (req, res) => {
                 }
             })
 
-            if (orderData?.data?.paymentInfo?.payments && orderData?.data?.paymentInfo?.payments.length > 0) {
+            if (orderData?.data?.orderState == "Confirmed") {
+                res.json({ capture: "alreadyreceived", order: orderData?.data });
+            }
+            else if (orderData?.data?.paymentInfo?.payments && orderData?.data?.paymentInfo?.payments.length > 0) {
 
                 let orderAmount = orderData?.data?.totalPrice?.centAmount || 0
                 let orderCurrency = orderData?.data?.totalPrice?.currencyCode || "EUR"
@@ -206,6 +209,9 @@ router.post("/capture", async (req, res) => {
                     }
 
                 }
+            }
+            else {
+                res.json({ capture: "paymentnotfound", order: orderData?.data });
             }
         }
     } catch (err) {
@@ -368,7 +374,7 @@ const saveTokenInCT = (recurringDetailReference, paymentMethod, shopperReference
                             }
                         }
                     ).then((result) => {
-                        console.log(result.data);
+                        console.log("Token Saved", result.data);
                     }).catch((err) => {
                         console.log(err)
                     });;
