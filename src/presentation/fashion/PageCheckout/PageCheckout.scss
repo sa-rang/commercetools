@@ -160,6 +160,25 @@
   }
 }
 
+.heading-checkout {
+
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+  margin: 0 0 60px;
+
+  &:before {
+    position: absolute;
+    content: '';
+    left: 0;
+    bottom: -15px;
+    background-color: #000;
+    width: 50px;
+    height: 2px;
+  }
+
+}
+
 .billing-info-wrap {
   h3 {
     font-size: 20px;

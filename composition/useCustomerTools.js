@@ -207,6 +207,11 @@ function useCustomerTools() {
     return basic.checkUserExist(email)
   }
 
+  const addUserAddress = (addressData) => {
+    //console.log("Address", addressData)
+    return basic.addUserAddress({ addressData, version: customer.value.version })
+  }
+
   const generatePassword = (
     length = 10,
     characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$'
@@ -235,7 +240,8 @@ function useCustomerTools() {
     updateMyCustomerPassword,
     checkUserExist,
     signupSocial,
-    socialLogin
+    socialLogin,
+    addUserAddress
   };
 }
 export default useCustomerTools;

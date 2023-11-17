@@ -16,6 +16,19 @@ custom {
     value
   }
 }
+addresses {
+  id
+  firstName
+  lastName
+  streetName
+  additionalStreetInfo
+  postalCode
+  city
+  country
+  phone
+  email
+
+}
 version
 email
 firstName
@@ -261,6 +274,38 @@ const checkUserExist = (email) =>
     fetchPolicy: 'network-only',
   });
 
+const addUserAddress = ({
+  version,
+  addressData
+}) =>
+  apolloClient.mutate({
+    mutation: gql`
+        mutation updateMyCustomer(
+          $actions: [MyCustomerUpdateAction!]!
+          $version: Long!
+        ) {
+          updateMyCustomer(
+            version: $version
+            actions: $actions
+          ) {
+            ${customerFields}
+          }
+        }
+      `,
+    variables: {
+      version,
+      actions: [
+        {
+          addAddress: {
+            address: addressData
+          }
+        }
+      ],
+    },
+  });
+
+
+
 export default {
   signup,
   updateUser,
@@ -274,5 +319,6 @@ export default {
   refreshUser,
   checkUserExist,
   signupSocial,
-  socialLogin
+  socialLogin,
+  addUserAddress
 };

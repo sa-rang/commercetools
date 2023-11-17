@@ -2,9 +2,13 @@
 <script src="./BillingDetails.js"></script>
 
 <template>
-  <div class="billing-info-wrap mr-100">
-    <h3>{{ t('billingDetails') }}</h3>
+  <div class="billing-info-wrap mr-100 mt-5">
+    <!-- <h3>{{ t('billingDetails') }}</h3> -->
     <BaseAddressForm @update-address="updateBillingAddress" @valid-form="validBillingForm" :address="billingAddress" />
+    <div class="checkout-account mt-20">
+      <input v-model="saveAddress" class="checkout-ship" type="checkbox" />
+      <span>{{ t('saveAddress') }}</span>
+    </div>
     <div class="checkout-account mt-20">
       <input v-model="differentAddress" class="checkout-ship" type="checkbox" data-test="other-shipping-address" />
       <span>{{ t('differentAddress') }}</span>

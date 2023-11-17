@@ -26,6 +26,7 @@ export default {
     const differentAddress = shallowRef(false);
     const newBillingAddress = shallowRef(null);
     const newShippingAddress = shallowRef(null);
+    const saveAddress = shallowRef(false);
 
     const billingToJSON = computed(() => {
       return JSON.stringify(newBillingAddress.value);
@@ -69,6 +70,12 @@ export default {
         newShippingAddress.value
       );
     });
+    watch(saveAddress, () => {
+      emit(
+        'save-address-toggle',
+        saveAddress.value
+      );
+    });
 
     return {
       t,
@@ -82,6 +89,7 @@ export default {
       updateShippingAddress,
       validBillingForm,
       validShippingForm,
+      saveAddress
     };
   },
 };

@@ -8,9 +8,20 @@
         <div class="checkout-wrap">
           <div class="row">
             <div class="col-lg-7">
-              <BillingDetails :billingAddress="billingAddress" :shippingAddress="shippingAddress"
-                @update-billing-details="updateBilling" @update-shipping-details="updateShipping"
-                @valid-billing-form="setValidBillingForm" @valid-shipping-form="setValidShippingForm" />
+              <h3 class="heading-checkout">Billing Details</h3>
+              <div v-if="customerAddresses.length > 0">
+                <AddressDetails :addressList="customerAddresses" @address-selected="addressSelected"
+                  v-if="billingAddressType == 'address'" />
+                <button @click.prevent="setBillingAddressType('form')" v-if="billingAddressType == 'address'">Add new
+                  address</button>
+                <button @click.prevent="setBillingAddressType('address')" v-if="billingAddressType == 'form'">Select from
+                  saved
+                  address</button>
+              </div>
+              <BillingDetails v-if="billingAddressType == 'form'" :billingAddress="billingAddress"
+                :shippingAddress="shippingAddress" @update-billing-details="updateBilling"
+                @update-shipping-details="updateShipping" @valid-billing-form="setValidBillingForm"
+                @valid-shipping-form="setValidShippingForm" @save-address-toggle="saveAddressToggle" />
             </div>
             <div class="col-lg-5">
               <OrderOverview @update-shipping="updateShippingMethod" @complete-order="placeOrder"

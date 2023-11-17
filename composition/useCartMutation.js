@@ -16,6 +16,7 @@ import useMiniCart from './useMinicart';
 import useSelectedChannel from './useSelectedChannel';
 import { getValue } from '../src/lib';
 import { apolloClient, cache } from '../src/apollo';
+import useCustomerTools from 'hooks/useCustomerTools';
 
 
 
@@ -42,6 +43,7 @@ export const useCartActions = () => {
   const { location } = useLocation();
   const { channel } = useSelectedChannel();
   const currency = useCurrency();
+  const customerTools = useCustomerTools();
   const debounce = (fn, time = 200) => {
     const current = {};
     const check = { current };
@@ -122,21 +124,31 @@ export const useCartActions = () => {
   const setAddressForCartAndCreateOrder = ({
     billingAddress,
     shippingAddress,
+    saveAddress
   }) => {
     return Promise.resolve().then(() => {
+      let billingAdd = {
+        ...getValue(billingAddress),
+        country: location.value,
+      }
+      let shippingAdd = {
+        ...(getValue(shippingAddress) ||
+          getValue(billingAddress)),
+        country: location.value,
+      }
       const actions = [
-        setBillingAddress({
-          ...getValue(billingAddress),
-          country: location.value,
-        }),
-        setShippingAddress({
-          ...(getValue(shippingAddress) ||
-            getValue(billingAddress)),
-          country: location.value,
-        }),
+        setBillingAddress(billingAdd),
+        setShippingAddress(shippingAdd),
       ];
       return mutateCart(actions).then(({ data }) => {//set billing shipping with actions
         const { id, version } = data.updateMyCart;
+
+        //Add Billing/Shipping Address in Customer Object
+        if (saveAddress) {
+          let userUpdate = customerTools.addUserAddress(billingAdd);
+          console.log(userUpdate);
+        }
+
         //create order
         return apolloClient.mutate(
           createMyOrderFromCart(id, version)
