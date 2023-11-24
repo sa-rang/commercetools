@@ -38,6 +38,7 @@ customerNumber
 customerGroupRef {
   customerGroupId: id
 }
+companyName
 `;
 const createResetToken = (email) =>
   apolloClient.mutate({
@@ -118,6 +119,7 @@ const signup = (form) => {
         password: form.password,
         firstName: form.firstName,
         lastName: form.lastName,
+        companyName: form.companyName
       },
     },
   });
@@ -264,6 +266,7 @@ const checkUserExist = (email) =>
        customers(limit: 1, where: $predicate) {
         results {
           email,
+          companyName
           }
         }
       }

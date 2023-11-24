@@ -6,6 +6,8 @@
             <i class="lab la-facebook"></i>
             <span>Login with Facebook</span>
         </button>
+        <div class="font-italic text-danger" style="font-size: 11px;" v-if="nonSocial">Already registerd, Please login with
+            password.</div>
     </div>
 </template>
 
@@ -13,12 +15,14 @@
 
 import useCustomerTools from 'hooks/useCustomerTools';
 import {
+    shallowRef,
     onMounted,
 } from 'vue';
 
 export default {
     setup() {
         const tools = useCustomerTools();
+        const nonSocial = shallowRef(false);
         onMounted(() => {
             window.FB.init({
                 appId: process.env.VUE_APP_FACEBOOK_APP_ID,
@@ -40,10 +44,16 @@ export default {
                             // //check if customer already exist
                             tools.checkUserExist(FBres.email).then((custRes) => {
                                 if (custRes?.data?.customers?.results && custRes?.data?.customers?.results.length == 1) {
+
+                                    let customer = custRes?.data?.customers?.results[0];
                                     //customer found
-                                    console.log("customer exists", FBres.email)
-                                    //directly login
-                                    tools.socialLogin(FBres.email)
+                                    console.log(`customer [${customer.email}] exists with initial reg type [${customer.companyName}]`)
+                                    if (customer.companyName && customer.companyName == "social") {
+                                        //directly login
+                                        tools.socialLogin(FBres.email)
+                                    } else {
+                                        nonSocial.value = true;
+                                    }
                                 } else {
                                     //register user & login
                                     let regData = {
@@ -51,6 +61,7 @@ export default {
                                         lastName: FBres.last_name ? FBres.last_name : "",
                                         email: FBres.email,
                                         agreeToTerms: true,
+                                        companyName: "social" //Used to set where customer initial registration from site or Social Auth
                                     }
                                     tools.signupSocial(regData)
                                 }
@@ -67,7 +78,7 @@ export default {
                 console.log(error)
             }
         }
-        return { fbLogin }
+        return { fbLogin, nonSocial }
     }
 };
 </script>

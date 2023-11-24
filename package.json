@@ -12,7 +12,8 @@
     "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\"",
     "start": "vue-cli-service serve",
     "server": "vue-cli-service build && node server.js",
-    "server-local": "vue-cli-service build && node server-local.js"
+    "server-local": "vue-cli-service build && node server-local.js",
+    "only-server": "node server-local.js"
   },
   "dependencies": {
     "@adyen/adyen-web": "^5.43.0",
