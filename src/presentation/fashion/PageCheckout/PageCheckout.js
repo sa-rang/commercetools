@@ -118,7 +118,9 @@ export default {
       setValidShippingForm(false)
       billingAddressType.value = iType
     }
-
+    const paymentChanged = (payment) => {
+      console.log(payment)
+    };
 
     return {
       ...cartTools,
@@ -135,6 +137,7 @@ export default {
       updateShipping,
       updateShippingMethod,
       paymentMethod,
+      paymentChanged,
       error,
       cart,
       t,

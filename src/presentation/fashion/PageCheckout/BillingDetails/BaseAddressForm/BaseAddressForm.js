@@ -20,7 +20,7 @@ export default {
     const { t } = useI18n({
       messages: translations
     });
-    const { form, v } = useBaseAddress();
+    const { form, v } = useBaseAddress(props.address);
     v.value.$touch();
     watch(
       form,

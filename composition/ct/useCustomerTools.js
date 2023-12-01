@@ -307,6 +307,76 @@ const addUserAddress = ({
     },
   });
 
+const updateUserAddress = ({
+  version,
+  addressData
+}) => {
+
+  let addId = addressData.id
+  delete addressData.id
+  let addData = addressData;
+
+  return apolloClient.mutate({
+    mutation: gql`
+          mutation updateMyCustomer(
+            $actions: [MyCustomerUpdateAction!]!
+            $version: Long!
+          ) {
+            updateMyCustomer(
+              version: $version
+              actions: $actions
+            ) {
+              ${customerFields}
+            }
+          }
+        `,
+    variables: {
+      version,
+      actions: [
+        {
+          changeAddress: {
+            addressId: addId,
+            address: addData
+          }
+        }
+      ],
+    },
+  });
+}
+
+const deleteUserAddress = ({
+  version,
+  addressData
+}) => {
+
+  let addId = addressData.id
+  return apolloClient.mutate({
+    mutation: gql`
+          mutation updateMyCustomer(
+            $actions: [MyCustomerUpdateAction!]!
+            $version: Long!
+          ) {
+            updateMyCustomer(
+              version: $version
+              actions: $actions
+            ) {
+              ${customerFields}
+            }
+          }
+        `,
+    variables: {
+      version,
+      actions: [
+        {
+          removeAddress: {
+            addressId: addId
+          }
+        }
+      ],
+    },
+  });
+}
+
 
 
 export default {
@@ -323,5 +393,7 @@ export default {
   checkUserExist,
   signupSocial,
   socialLogin,
-  addUserAddress
+  addUserAddress,
+  updateUserAddress,
+  deleteUserAddress
 };

@@ -212,6 +212,19 @@ function useCustomerTools() {
     return basic.addUserAddress({ addressData, version: customer.value.version })
   }
 
+  const updateUserAddress = (addressData) => {
+    //console.log("Address", addressData)
+    return basic.updateUserAddress({ addressData, version: customer.value.version })
+  }
+
+
+  const deleteUserAddress = (addressData) => {
+    //console.log("Address", addressData)
+    return basic.deleteUserAddress({ addressData, version: customer.value.version })
+  }
+
+
+
   const generatePassword = (
     length = 10,
     characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$'
@@ -241,7 +254,9 @@ function useCustomerTools() {
     checkUserExist,
     signupSocial,
     socialLogin,
-    addUserAddress
+    addUserAddress,
+    updateUserAddress,
+    deleteUserAddress
   };
 }
 export default useCustomerTools;

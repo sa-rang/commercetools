@@ -14,6 +14,7 @@ import User from 'presentation/User/User.vue';
 import TabDashboard from 'presentation/User/TabDashboard/TabDashboard.vue';
 import TabAccountDetails from 'presentation/User/TabAccountDetails/TabAccountDetails.vue';
 import TabChangePassword from 'presentation/User/TabChangePassword/TabChangePassword.vue';
+import TabManageAddress from 'presentation/User/TabManageAddress/TabManageAddress.vue';
 import ForgotPassword from 'presentation/Login/ForgotPassword/ForgotPassword.vue';
 import ResetPassword from 'presentation/User/ResetPassword/ResetPassword.vue';
 import TabOrderList from 'presentation/User/TabOrderList/TabOrderList.vue';
@@ -170,6 +171,11 @@ export default [
             path: 'changepassword',
             name: 'changepassword',
             component: TabChangePassword,
+          },
+          {
+            path: 'manageaddress',
+            name: 'manageaddress',
+            component: TabManageAddress,
           },
         ],
       },

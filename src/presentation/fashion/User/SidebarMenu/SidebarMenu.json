@@ -8,7 +8,8 @@
     "wishlist": "Wishlist",
     "signOut": "Sign Out",
     "changePassword": "Change password",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "manageAddress": "Addresses"
   },
   "de": {
     "accountDetails": "Benutzerdaten",
@@ -19,6 +20,7 @@
     "wishlist": "Wunschliste",
     "signOut": "Abmelden",
     "changePassword": "Passwort ändern",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "manageAddress": "Addresses"
   }
 }

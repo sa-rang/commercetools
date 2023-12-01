@@ -8,6 +8,9 @@
     }}</router-link>
     <router-link :class="activeTab === 'orders' ? 'active' : ''" :to="{ name: 'orders' }" data-test="my-orders-button">{{
       t('myOrders') }}</router-link>
+    <router-link :class="activeTab === 'manageaddress' ? 'active' : ''" :to="{ name: 'manageaddress' }"
+      data-test="my-orders-button">{{
+        t('manageAddress') }}</router-link>
     <router-link :class="activeTab === 'changepassword' ? 'active' : ''
       " :to="{ name: 'changepassword' }" data-test="change-password-button">{{ t('changePassword') }}</router-link>
     <a href="#" @click.prevent="signOut" data-test="sign-out">

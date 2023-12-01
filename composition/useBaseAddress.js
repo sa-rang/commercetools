@@ -2,8 +2,11 @@ import { ref } from 'vue';
 import { required, email } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 
-function useBaseAddress() {
+function useBaseAddress(initAddress) {
   const form = ref({});
+  if (initAddress) {
+    form.value = initAddress
+  }
   const rules = {
     firstName: { required, $lazy: true },
     lastName: { required, $lazy: true },
