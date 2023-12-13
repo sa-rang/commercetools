@@ -40,8 +40,9 @@ const config = {
       'https://api.europe-west1.gcp.commercetools.com',
   },
   languages: {
-    en: 'English',
     de: 'Deutsch',
+    en: 'English'
+
   },
   countries: {
     DE: 'Deutschland',
