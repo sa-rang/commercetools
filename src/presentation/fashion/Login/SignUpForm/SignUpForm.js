@@ -48,7 +48,7 @@ export default {
       password: '',
       repeatPassword: '',
       agreeToTerms: true,
-      companyName: "" //Used to set where customer initial registration from site or Social Auth
+      companyName: "site" //Used to set where customer initial registration from site or Social Auth
     });
     const rules = new Rules(form);
     const v = useVuelidate(rules, form);
