@@ -119,7 +119,15 @@ const signup = (form) => {
         password: form.password,
         firstName: form.firstName,
         lastName: form.lastName,
-        companyName: form.companyName
+        //companyName: form.companyName
+        custom: {
+          typeId: `${process.env.VUE_APP_CT_SOCIALCODE_FIELD_ID}`,
+          //typeKey: "customer-SocialCode",
+          fields: [{
+            name: "SocialCode",
+            value: JSON.stringify(String(form.companyName))
+          }]
+        }
       },
     },
   });
@@ -266,7 +274,13 @@ const checkUserExist = (email) =>
        customers(limit: 1, where: $predicate) {
         results {
           email,
-          companyName
+          companyName,
+          custom {
+            customFieldsRaw {
+              name
+              value
+            }
+          }
           }
         }
       }

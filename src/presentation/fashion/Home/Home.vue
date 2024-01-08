@@ -113,5 +113,15 @@
         </div>
       </div>
     </div>
+
+    <div class="banner-area pt-30">
+      <div class="custom-container">
+        <div class="row">
+          <div class="col-sm-12">
+            <ProductShowcase />
+          </div>
+        </div>
+      </div>
+    </div>
   </span>
 </template>

@@ -28,13 +28,22 @@ export default {
                     if (res?.data?.customers?.results && res?.data?.customers?.results.length == 1) {
                         let customer = res?.data?.customers?.results[0];
                         //customer found
-                        console.log(`customer [${customer.email}] exists with initial reg type [${customer.companyName}]`)
-                        if (customer.companyName && customer.companyName == "social") {
-                            //directly login
-                            tools.socialLogin(userData.email)
+                        console.log(`customer [${customer.email}] exists `);
+                        if (customer?.custom?.customFieldsRaw && customer?.custom?.customFieldsRaw.length > 0) {
+                            let rawFields = customer?.custom?.customFieldsRaw;
+                            let RegType = rawFields.find(o => o.name === 'SocialCode');
+                            console.log(`Initial Registration type: [${RegType?.value}]`);
+                            if (RegType && RegType?.value == "social") {
+                                //directly login
+                                tools.socialLogin(userData.email)
+                            }
+                            else {
+                                nonSocial.value = true;
+                            }
                         } else {
                             nonSocial.value = true;
                         }
+
                     } else {
                         //register user & login
                         let regData = {

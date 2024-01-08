@@ -4,14 +4,14 @@
     "sneakers": "SNEAKERS",
     "accessories": "BAGS",
     "bathing_suits": "JACKETS",
-    "free_shipping_head": "Free Worldwide Shipping",
+    "free_shipping_head": "Free Shipping Across the Globe",
     "free_shipping_body": "On all orders over",
     "currency": "$",
-    "return_head": "30 Days Money Returns",
+    "return_head": "Money-Back Assurance for 30 Days",
     "return_body": "30 days money back guarantee",
-    "support_head": "Support 24/7",
+    "support_head": "24/7 Customer Help",
     "support_body": "Offered in the country of usage",
-    "secure_checkout_head": "100% Secure Checkout",
+    "secure_checkout_head": "Checkout with Complete Security",
     "secure_checkout_body": "Paypal / Visa / Master Card"
   },
   "de": {
@@ -22,11 +22,11 @@
     "free_shipping_head": "Kostenloser weltweiter Versand",
     "free_shipping_body": "Für alle Bestellungen über",
     "currency": "€",
-    "return_head": "30 Tage Geldrückgabe",
-    "return_body": "30 Tage Geld-zurück-Garantie",
-    "support_head": "Unterstützung 24/7",
-    "support_body": "Angeboten im Land der Nutzung",
-    "secure_checkout_head": "100% sicherer Checkout",
+    "return_head": "Money-Back Assurance for 30 Days",
+    "return_body": "30 days money back guarantee",
+    "support_head": "24/7 Customer Help",
+    "support_body": "Offered in the country of usage",
+    "secure_checkout_head": "Checkout with Complete Security",
     "secure_checkout_body": "Paypal / Visa / Master Card"
   }
 }

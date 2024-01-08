@@ -3,10 +3,11 @@ import locale from "./Home.json"
 import Banner from 'presentation/Banner/Banner.vue';
 import BaseMoney from 'presentation/components/BaseMoney/BaseMoney.vue';
 import { useRouter } from 'vue-router';
+import ProductShowcase from "./ProductShowcase.vue";
 
 export default {
   name: 'Home',
-  components: { Banner, BaseMoney },
+  components: { Banner, BaseMoney, ProductShowcase },
 
   setup() {
     const router = useRouter();
