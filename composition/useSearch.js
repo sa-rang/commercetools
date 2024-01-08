@@ -11,7 +11,7 @@ const useSearch = () => {
     };
 
     //NLP api health check logic //Not the best but asked to do as poc, anyways
-    let ifSearchFromNPLWorking = false;
+
     try {
       let param = {
         search: 'bags'
@@ -24,39 +24,33 @@ const useSearch = () => {
         },
       });
       let searchResults = await res.json();
-      if (searchResults) {
-        ifSearchFromNPLWorking = true
+      if (searchResults?.error) {
+        console.log("NLP search not working | redirected to Site search")
+        return router.push({
+          ...route,
+          name: 'products',
+          query: {
+            ...route.query,
+            q,
+          },
+          params,
+        });
+      } else {
+        console.log("NLP search")
+        return router.push({
+          ...route,
+          name: 'SearchList',
+          query: {
+            ...route.query,
+            q,
+          },
+          params,
+        });
       }
     } catch (error) {
-      console.log("NLP search not working | redirected to Site search")
+      console.error(`Error: ${error} `);
+
     }
-
-
-    if (ifSearchFromNPLWorking) {
-      return router.push({
-        ...route,
-        name: 'SearchList',
-        query: {
-          ...route.query,
-          q,
-        },
-        params,
-      });
-    } else {
-      return router.push({
-        ...route,
-        name: 'products',
-        query: {
-          ...route.query,
-          q,
-        },
-        params,
-      });
-    }
-
-
-
-
   };
 
   return {

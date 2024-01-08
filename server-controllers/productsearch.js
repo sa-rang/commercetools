@@ -123,8 +123,8 @@ const productSearch = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(`Error: ${err.message}, error code: ${err.statusCode} `);
-    res.status(err.statusCode).json(err.message);
+    console.error(`Error: ${err}`);
+    res.json({ error: { status: err?.status, message: err?.message } });
   }
 }
 
